@@ -413,6 +413,13 @@ int main()
 	std::string submarinFileName = (currentPath + "\\Models\\Submarin\\submarin.obj");
 	Model submarinObjModel(submarinFileName, false);
 
+	glm::mat4 sunModel = glm::mat4(1.0f);
+	std::string sunFileName = (currentPath + "\\Models\\Sun\\sun.obj");
+	Model sunObjModel(sunFileName, false);
+
+	float fSunRotateAngle = 0.f;
+	float fSunRotateSpeed = 10.f;
+
 	// render loop	
 	while (!glfwWindowShouldClose(window)) {
 		// per-frame time logic
@@ -458,6 +465,23 @@ int main()
 		submarinModel = glm::rotate(submarinModel,glm::radians(180.f), glm::vec3(0.0, 0.5, 0.0));
 		lightingWithTextureShader.setMat4("model", submarinModel);
 		submarinObjModel.Draw(lightingWithTextureShader);
+
+		lightingWithTextureShader.setMat4("projection", pCamera->GetProjectionMatrix());
+		lightingWithTextureShader.setMat4("view", pCamera->GetViewMatrix());
+
+		fSunRotateAngle += fSunRotateSpeed * deltaTime;
+		if (fSunRotateAngle > 360.f)
+			fSunRotateAngle -= 360.f;
+
+		fSunRotateAngle += 0.001f;
+		glm::vec3 scaleFactors = glm::vec3(8.0f, 8.0f, 1.0f);
+
+		sunModel = glm::mat4(1.0f);
+		sunModel = glm::translate(sunModel, glm::vec3(-3.0f, 4.0f, 0.0f));
+		sunModel = glm::rotate(sunModel, glm::radians(fSunRotateAngle), glm::vec3(0.0f, 0.5f, 0.0f));
+		sunModel = glm::scale(sunModel, scaleFactors);
+		lightingWithTextureShader.setMat4("model", sunModel);
+		sunObjModel.Draw(lightingWithTextureShader);
 
 		// also draw the lamp object
 		lampShader.use();

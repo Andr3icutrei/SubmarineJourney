@@ -455,6 +455,7 @@ int main()
 		lightingWithTextureShader.setMat4("projection", pCamera->GetProjectionMatrix());
 		lightingWithTextureShader.setMat4("view", pCamera->GetViewMatrix());
 		submarinModel = glm::scale(glm::mat4(1.0), glm::vec3(1.f));
+		submarinModel = glm::rotate(submarinModel,glm::radians(180.f), glm::vec3(0.0, 0.5, 0.0));
 		lightingWithTextureShader.setMat4("model", submarinModel);
 		submarinObjModel.Draw(lightingWithTextureShader);
 

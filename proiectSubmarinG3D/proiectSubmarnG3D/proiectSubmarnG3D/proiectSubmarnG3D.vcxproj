@@ -153,7 +153,7 @@
     <ClCompile Include="proiectSubmarnG3D.cpp" />
     <ClCompile Include="Shader.cpp" />
     <ClCompile Include="Submarine.cpp" />
-    <ClCompile Include="Sun.cpp" />
+    <ClCompile Include="LightsSource.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -166,7 +166,7 @@
     <ClInclude Include="Model.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="Submarine.h" />
-    <ClInclude Include="Sun.h" />
+    <ClInclude Include="LightSource.h" />
     <ClInclude Include="Texture.h" />
     <ClInclude Include="Vertex.h" />
   </ItemGroup>

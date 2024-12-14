@@ -1,4 +1,5 @@
 // ViewOBJModel.cpp : This file contains the 'main' function. Program execution begins and ends there.
+#define _CRT_SECURE_NO_WARNINGS
 
 #include <Windows.h>
 #include <locale>
@@ -16,13 +17,15 @@
 
 #include <glfw3.h>
 
+#include <ctime>
 #include <iostream>
 #include <fstream>
 #include <sstream>
+
 #include "Shader.h"
 #include "Model.h"
 #include "FlyingCube.h"
-#include "Sun.h"
+#include "LightSource.h"
 #include "Submarine.h"
 
 #pragma comment (lib, "glfw3dll.lib")
@@ -207,19 +210,32 @@ int main()
 	Shader lightingWithTextureShader((currentPath + "\\Shaders\\PhongLightWithTexture.vs").c_str(), (currentPath + "\\Shaders\\PhongLightWithTexture.fs").c_str());
 	Shader lampShader((currentPath + "\\Shaders\\Lamp.vs").c_str(), (currentPath + "\\Shaders\\Lamp.fs").c_str());
 
-	std::string objFileName = (currentPath + "\\Models\\FlyingCube.obj");
-	FlyingCube flyingCubeModel(objFileName, false);
-
 	glm::mat4 submarineModel = glm::mat4(1.0f);
 	std::string submarineFileName = (currentPath + "\\Models\\Submarin\\submarin.obj");
 	Model submarineObjModel(submarineFileName, false);
 
+	std::string lightSourcePath = currentPath;
 
-	std::string sunPath = currentPath+"\\Models\\Sun\\sun.obj";
-	Sun sun(sunPath,lightingWithTextureShader);
+	std::time_t currentTime = std::time(nullptr);
+	std::tm* localTime = std::localtime(&currentTime);
+	int hour = localTime->tm_hour;
 
-	float fSunRotateAngle = 0.f;
-	float fSunRotateSpeed = 10.f;
+	glm::vec3 lightSourceScale;
+	glm::vec3 lightColor;
+	if (hour >= 6 && hour <= 18)
+	{
+		lightColor =glm::vec3(1.0f, 0.9f, 0.2f);//sun light color
+		lightSourcePath += "\\Models\\Sun\\sun.obj";
+		lightSourceScale = glm::vec3(8.0f, 8.0f, 1.0f);
+	}
+	else
+	{
+		glm::vec3 moonColor(0.9f, 0.9f, 1.0f);//moon light color
+		lightSourcePath += "\\Models\\Moon\\Moon.obj";
+		lightSourceScale = glm::vec3(0.2f, 0.2f, 0.2f);
+	}
+
+	LightSource lightSource(lightSourcePath,lightingWithTextureShader,lightSourceScale);
 
 	// render loop	
 	while (!glfwWindowShouldClose(window)) {
@@ -231,60 +247,23 @@ int main()
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		lightPos.x = 2.5 * cos(glfwGetTime());
-		lightPos.z = 2.5 * sin(glfwGetTime());
-
-		cubePos.x = 10 * sin(glfwGetTime());
-		cubePos.z = 10 * cos(glfwGetTime());
-
-		lightingShader.use();
-		lightingShader.SetVec3("objectColor", 0.5f, 1.0f, 0.31f);
-		lightingShader.SetVec3("lightColor", 1.0f, 1.0f, 1.0f);
-		lightingShader.SetVec3("lightPos", lightPos);
-		lightingShader.SetVec3("viewPos", pCamera->cameraPosition);
-
 		lightingShader.setMat4("projection", pCamera->getProjectionMatrix());
 		lightingShader.setMat4("view", pCamera->getViewMatrix());
 
-		// render the model
-		glm::mat4 model = glm::scale(glm::mat4(1.0), glm::vec3(0.1f));
-		model = glm::translate(model, cubePos);
-		flyingCubeModel.SetRootTransf(model);
-		//lightingShader.setMat4("model", model);
-		flyingCubeModel.Draw(lightingShader);
-
 		lightingWithTextureShader.use();
 		lightingWithTextureShader.SetVec3("objectColor", 0.5f, 1.0f, 0.31f);
-		lightingWithTextureShader.SetVec3("lightColor", 1.0f, 1.0f, 1.0f);
+		lightingWithTextureShader.SetVec3("lightColor",lightSourceScale);
 		lightingWithTextureShader.SetVec3("lightPos", lightPos);
 		lightingWithTextureShader.SetVec3("viewPos", pCamera->cameraPosition);
 		lightingWithTextureShader.setInt("texture_diffuse1", 0);
 
+		lightSource.rotate(deltaTime, lightingWithTextureShader);
+
 		lightingWithTextureShader.setMat4("projection", pCamera->getProjectionMatrix());
 		lightingWithTextureShader.setMat4("view", pCamera->getViewMatrix());
-
 		lightingWithTextureShader.setMat4("model", submarine->getModel());
+
 		submarineObjModel.Draw(lightingWithTextureShader);
-
-		lampShader.setMat4("projection", pCamera->getProjectionMatrix());
-		lampShader.setMat4("view", pCamera->getViewMatrix());
-
-		fSunRotateAngle += fSunRotateSpeed * deltaTime;
-		if (fSunRotateAngle > 360.f)
-			fSunRotateAngle -= 360.f;
-
-		fSunRotateAngle += 0.001f;
-		glm::vec3 scaleFactors = glm::vec3(8.0f, 8.0f, 1.0f);
-
-		sun.makeSunRotate(deltaTime, lightingWithTextureShader);
-
-		// also draw the lamp object
-		lampShader.use();
-		lampShader.setMat4("projection", pCamera->getProjectionMatrix());
-		lampShader.setMat4("view", pCamera->getViewMatrix());
-		glm::mat4 lightModel = glm::translate(glm::mat4(1.0), lightPos);
-		lightModel = glm::scale(lightModel, glm::vec3(0.05f)); // a smaller cube
-		lampShader.setMat4("model", lightModel);
 
 		glBindVertexArray(lightVAO);
 		glDrawArrays(GL_TRIANGLES, 0, 36);

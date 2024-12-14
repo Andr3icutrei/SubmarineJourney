@@ -9,7 +9,7 @@ void Sun::makeSunRotate(double deltaTime,Shader& lightingWithTextureShader)
 	m_rotateAngle += 0.001f;
 
 	m_mat=glm::mat4(1.0f);
-	m_mat=glm::translate(m_mat, glm::vec3(-3.0f, 4.0f, 0.0f));
+	//m_mat=glm::translate(m_mat, glm::vec3(-3.0f, 4.0f, 0.0f));
 	m_mat=glm::rotate(m_mat, glm::radians(m_rotateAngle), glm::vec3(0.0f, 0.5f, 0.0f));
 	m_mat = glm::scale(m_mat, m_scaleFactors);
 	lightingWithTextureShader.setMat4("model", m_mat);

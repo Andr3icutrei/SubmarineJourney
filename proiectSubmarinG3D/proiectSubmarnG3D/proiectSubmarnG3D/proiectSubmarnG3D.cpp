@@ -22,6 +22,7 @@
 #include "Shader.h"
 #include "Model.h"
 #include "FlyingCube.h"
+#include "Sun.h"
 
 #pragma comment (lib, "glfw3dll.lib")
 #pragma comment (lib, "glew32.lib")
@@ -413,9 +414,8 @@ int main()
 	std::string submarinFileName = (currentPath + "\\Models\\Submarin\\submarin.obj");
 	Model submarinObjModel(submarinFileName, false);
 
-	glm::mat4 sunModel = glm::mat4(1.0f);
-	std::string sunFileName = (currentPath + "\\Models\\Sun\\sun.obj");
-	Model sunObjModel(sunFileName, false);
+	std::string sunPath = currentPath+"\\Models\\Sun\\sun.obj";
+	Sun sun(sunPath,lightingWithTextureShader);
 
 	float fSunRotateAngle = 0.f;
 	float fSunRotateSpeed = 10.f;
@@ -476,12 +476,7 @@ int main()
 		fSunRotateAngle += 0.001f;
 		glm::vec3 scaleFactors = glm::vec3(8.0f, 8.0f, 1.0f);
 
-		sunModel = glm::mat4(1.0f);
-		sunModel = glm::translate(sunModel, glm::vec3(-3.0f, 4.0f, 0.0f));
-		sunModel = glm::rotate(sunModel, glm::radians(fSunRotateAngle), glm::vec3(0.0f, 0.5f, 0.0f));
-		sunModel = glm::scale(sunModel, scaleFactors);
-		lightingWithTextureShader.setMat4("model", sunModel);
-		sunObjModel.Draw(lightingWithTextureShader);
+		sun.makeSunRotate(deltaTime, lightingWithTextureShader);
 
 		// also draw the lamp object
 		lampShader.use();

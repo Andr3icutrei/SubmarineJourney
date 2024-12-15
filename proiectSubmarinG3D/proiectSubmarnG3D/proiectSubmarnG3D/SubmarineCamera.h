@@ -10,6 +10,7 @@
 #include <glfw3.h>
 
 #include "shader.h"
+#include "ICamera.h"
 
 enum Dir
 {
@@ -23,7 +24,7 @@ enum Dir
 	FORWARD_RIGHT
 };
 
-class Camera
+class SubmarineCamera : public ICamera
 {
 public:
 	//default camera values
@@ -43,6 +44,8 @@ public:
 
 	glm::vec3 worldUp;
 
+	glm::mat4 m_projectionMatrix;
+
 	float yaw;
 	float pitch;
 	float rotationSpeed;
@@ -54,18 +57,17 @@ public:
 	int height;
 	int width;
 
-	Camera(int newHeight, int newWidth, glm::vec3 position);
+	SubmarineCamera(int newHeight, int newWidth, glm::vec3 position);
 
 	void updateCamera(glm::vec3 position, glm::vec3 forwardDirection, float newYaw, float newPitch);
 	void resetCamera(int newHeight, int newWidth, glm::vec3 position);
-	void Reshape(int windowWidth, int windowHeight);
-
+	void Reshape(int windowWidth, int windowHeight) override;
 	float getYaw();
 	float getPitch();
-	glm::mat4 getViewMatrix();
-	glm::mat4 getProjectionMatrix();
+	glm::mat4 getViewMatrix() const override;
+	glm::mat4 getProjectionMatrix() const override;
 	glm::vec3 getDirectionVector();
-
+	glm::vec3 getPosition() const override;
 private:
 	void updateCameraVectors();
 };

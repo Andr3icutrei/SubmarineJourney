@@ -10,7 +10,7 @@
 #include <glfw3.h>
 
 #include "shader.h"
-#include "Camera.h"
+#include "SubmarineCamera.h"
 #include <queue>
 
 class Submarine

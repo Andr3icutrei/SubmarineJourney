@@ -27,22 +27,29 @@
 #include "FlyingCube.h"
 #include "LightSource.h"
 #include "Submarine.h"
+#include "SubmarineCamera.h"
+#include "SideviewCamera.h"
+#include "Water.h"
 
 #pragma comment (lib, "glfw3dll.lib")
 #pragma comment (lib, "glew32.lib")
 #pragma comment (lib, "OpenGL32.lib")
 
 // settings
-const unsigned int SCR_WIDTH = 800;
-const unsigned int SCR_HEIGHT = 600;
+const unsigned int SCR_WIDTH = 1200;
+const unsigned int SCR_HEIGHT = 800;
 
 GLuint ProjMatrixLocation, ViewMatrixLocation, WorldMatrixLocation;
 Submarine* submarine = nullptr;
-Camera* pCamera = nullptr;
+
+SubmarineCamera submarineCamera(SCR_HEIGHT, SCR_WIDTH, glm::vec3(0.0, 0.0, 3.0));
+SideviewCamera sideCamera(glm::vec3(7.0f, 3.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f),
+	SCR_WIDTH, SCR_HEIGHT);
+ICamera* camera = nullptr;
 
 void Cleanup()
 {
-	delete pCamera;
+	delete camera;
 }
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
@@ -79,15 +86,25 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 		glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
 		submarine->updateSubmarine(Dir::FORWARD_RIGHT, deltaTime);
 
-	if (glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS)
+	if (glfwGetKey(window, GLFW_KEY_O) == GLFW_PRESS)//O - camera submarinului
 	{
-		int width, height;
-		glfwGetWindowSize(window, &width, &height);
-		pCamera->resetCamera(SCR_HEIGHT, SCR_WIDTH, glm::vec3(0.0f, 0.0f, 3.0f));
-		glm::vec3 submarinePosition(0.0f);
+		if (SideviewCamera* currentCamera = dynamic_cast<SideviewCamera*>(camera))
+		{
+			camera = &submarineCamera;
+		}
 	}
 
-	pCamera->updateCamera(submarine->getPosition(), submarine->getForwardDirection(), submarine->getYaw(), submarine->getPitch());
+	if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS)//P- side view camera
+	{
+		if (SubmarineCamera* currentCamera = dynamic_cast<SubmarineCamera*>(camera))
+		{
+			camera = &sideCamera;
+		}
+	}
+	if (SubmarineCamera* currentCamera = dynamic_cast<SubmarineCamera*>(camera))
+	{
+		currentCamera->updateCamera(submarine->getPosition(), submarine->getForwardDirection(), submarine->getYaw(), submarine->getPitch());
+	}
 }
 
 int main()
@@ -97,6 +114,7 @@ int main()
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+	camera = new SubmarineCamera(submarineCamera);
 
 	// glfw window creation
 	GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "Submarine", NULL, NULL);
@@ -117,81 +135,8 @@ int main()
 
 	glEnable(GL_DEPTH_TEST);
 
-	// set up vertex data (and buffer(s)) and configure vertex attributes
-	float vertices[] = {
-		-0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-		0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-		0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-		0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-		-0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-		-0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
 
-		-0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
-		0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
-		0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
-		0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
-		-0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
-		-0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
-
-		-0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
-		-0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
-		-0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
-		-0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
-		-0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
-		-0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
-
-		0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
-		0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
-		0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
-		0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
-		0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
-		0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
-
-		-0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
-		0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
-		0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
-		0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
-		-0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
-		-0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
-
-		-0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
-		0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
-		0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
-		0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
-		-0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
-		-0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f
-	};
-	// first, configure the cube's VAO (and VBO)
-	unsigned int VBO, cubeVAO;
-	glGenVertexArrays(1, &cubeVAO);
-	glGenBuffers(1, &VBO);
-
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-	glBindVertexArray(cubeVAO);
-
-	// position attribute
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
-	glEnableVertexAttribArray(0);
-	// normal attribute
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
-	glEnableVertexAttribArray(1);
-
-	// second, configure the light's VAO (VBO stays the same; the vertices are the same for the light object which is also a 3D cube)
-	unsigned int lightVAO;
-	glGenVertexArrays(1, &lightVAO);
-	glBindVertexArray(lightVAO);
-
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	// note that we update the lamp's position attribute's stride to reflect the updated buffer data
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
-	glEnableVertexAttribArray(0);
-
-	// Create camera
-	pCamera = new Camera(SCR_HEIGHT, SCR_WIDTH, glm::vec3(0.0, 0.0, 3.0));
-
-	//Create submarine
+	//Create submarine	
 	submarine = new Submarine();
 
 	glm::vec3 lightPos(0.0f, 2.0f, 1.0f);
@@ -207,8 +152,15 @@ int main()
 	std::string currentPath = converter.to_bytes(wscurrentPath);
 
 	Shader lightingShader((currentPath + "\\Shaders\\PhongLight.vs").c_str(), (currentPath + "\\Shaders\\PhongLight.fs").c_str());
+	
 	Shader lightingWithTextureShader((currentPath + "\\Shaders\\PhongLightWithTexture.vs").c_str(), (currentPath + "\\Shaders\\PhongLightWithTexture.fs").c_str());
+	
 	Shader lampShader((currentPath + "\\Shaders\\Lamp.vs").c_str(), (currentPath + "\\Shaders\\Lamp.fs").c_str());
+	
+	Shader waterShader((currentPath+"\\Shaders\\Water.vs").c_str(), (currentPath + "\\Shaders\\Water.fs").c_str());
+	std::string strWaterJpgPath = currentPath + "\\x64\\Debug\\water.jpg";
+	const char* waterPath{ strWaterJpgPath.c_str()};
+	Water water(glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(10.0f, 10.0f, 50.0f), waterPath);
 
 	glm::mat4 submarineModel = glm::mat4(1.0f);
 	std::string submarineFileName = (currentPath + "\\Models\\Submarin\\submarin.obj");
@@ -222,20 +174,22 @@ int main()
 
 	glm::vec3 lightSourceScale;
 	glm::vec3 lightColor;
-	if (hour >= 6 && hour <= 18)
+	if (!(hour >= 6 && hour <= 18))
 	{
-		lightColor =glm::vec3(1.0f, 0.9f, 0.2f);//sun light color
+		lightColor = glm::vec3(1.0f, 0.95f, 0.6f);//sun light color
 		lightSourcePath += "\\Models\\Sun\\sun.obj";
-		lightSourceScale = glm::vec3(8.0f, 8.0f, 1.0f);
+		lightSourceScale = glm::vec3(5.0f, 5.0f, 1.0f);
 	}
 	else
 	{
-		glm::vec3 moonColor(0.9f, 0.9f, 1.0f);//moon light color
+		lightColor= glm::vec3(0.7f, 0.8f, 1.0f);//moon light color
 		lightSourcePath += "\\Models\\Moon\\Moon.obj";
 		lightSourceScale = glm::vec3(0.2f, 0.2f, 0.2f);
 	}
 
+	glDepthMask(true);
 	LightSource lightSource(lightSourcePath,lightingWithTextureShader,lightSourceScale);
+	lightSource.setPosition(glm::vec3(-3.0f, 3.0f, -8.0f));
 
 	// render loop	
 	while (!glfwWindowShouldClose(window)) {
@@ -247,37 +201,47 @@ int main()
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		lightingShader.setMat4("projection", pCamera->getProjectionMatrix());
-		lightingShader.setMat4("view", pCamera->getViewMatrix());
+		waterShader.use();
+		waterShader.setMat4("view", camera->getViewMatrix());
+		waterShader.setMat4("projection", camera->getProjectionMatrix());
+
+
+		// Draw water
+		water.draw(waterShader);
 
 		lightingWithTextureShader.use();
 		lightingWithTextureShader.SetVec3("objectColor", 0.5f, 1.0f, 0.31f);
-		lightingWithTextureShader.SetVec3("lightColor",lightSourceScale);
-		lightingWithTextureShader.SetVec3("lightPos", lightPos);
-		lightingWithTextureShader.SetVec3("viewPos", pCamera->cameraPosition);
+		lightingWithTextureShader.SetVec3("lightColor", lightColor);
+
+		lightingWithTextureShader.SetVec3("viewPos", camera->getPosition());
 		lightingWithTextureShader.setInt("texture_diffuse1", 0);
 
-		lightSource.rotate(deltaTime, lightingWithTextureShader);
+		lightSource.rotate(deltaTime, lightingWithTextureShader, camera->getViewMatrix());
+		lightSource.draw(lightingWithTextureShader);
 
-		lightingWithTextureShader.setMat4("projection", pCamera->getProjectionMatrix());
-		lightingWithTextureShader.setMat4("view", pCamera->getViewMatrix());
-		lightingWithTextureShader.setMat4("model", submarine->getModel());
+		//std::cout << lightSource.getPosition().x<< " "<<lightSource.getPosition().y<<" "<<
+			//lightSource.getPosition().z;
+		if (SubmarineCamera* subCam = dynamic_cast<SubmarineCamera*>(camera))
+		{
+			lightingWithTextureShader.setMat4("projection", subCam->getProjectionMatrix());
+			lightingWithTextureShader.setMat4("view", subCam->getViewMatrix());
+			lightingWithTextureShader.setMat4("model", submarine->getModel());
+		}
+		else if (SideviewCamera* sideCam = dynamic_cast<SideviewCamera*>(camera))
+		{
+			glm::mat4 projection = glm::perspective(glm::radians(75.0f), (float)SCR_WIDTH / SCR_HEIGHT, 0.1f, 100.0f);
+			lightingWithTextureShader.setMat4("projection", projection);
+			lightingWithTextureShader.setMat4("view", sideCam->getViewMatrix());
+			lightingWithTextureShader.setMat4("model", submarine->getModel());
+		}
 
 		submarineObjModel.Draw(lightingWithTextureShader);
 
-		glBindVertexArray(lightVAO);
-		glDrawArrays(GL_TRIANGLES, 0, 36);
-
-		// glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 	}
 
 	Cleanup();
-
-	glDeleteVertexArrays(1, &cubeVAO);
-	glDeleteVertexArrays(1, &lightVAO);
-	glDeleteBuffers(1, &VBO);
 
 	// glfw: terminate, clearing all previously allocated GLFW resources
 	glfwTerminate();
@@ -290,5 +254,5 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
 	// make sure the viewport matches the new window dimensions; note that width and 
 	// height will be significantly larger than specified on retina displays.
-	pCamera->Reshape(width, height);
+	camera->Reshape(width, height);
 }

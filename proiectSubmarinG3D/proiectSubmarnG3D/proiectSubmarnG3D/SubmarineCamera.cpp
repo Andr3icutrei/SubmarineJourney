@@ -1,6 +1,6 @@
-#include "Camera.h"
+#include "SubmarineCamera.h"
 
-Camera::Camera(int newHeight, int newWidth, glm::vec3 position) : 
+SubmarineCamera::SubmarineCamera(int newHeight, int newWidth, glm::vec3 position) :
 	height(newHeight),
 	width(newWidth),
 	cameraPosition(position),
@@ -18,7 +18,7 @@ Camera::Camera(int newHeight, int newWidth, glm::vec3 position) :
 	updateCameraVectors();
 }
 
-void Camera::updateCamera(glm::vec3 position, glm::vec3 forwardDirection, float newYaw, float newPitch)
+void SubmarineCamera::updateCamera(glm::vec3 position, glm::vec3 forwardDirection, float newYaw, float newPitch)
 {
 	cameraPosition = position - forwardDirection * cameraOffset.z + glm::vec3(0.0f, cameraOffset.y, 0.0f);
 
@@ -28,7 +28,7 @@ void Camera::updateCamera(glm::vec3 position, glm::vec3 forwardDirection, float 
 	updateCameraVectors();
 }
 
-void Camera::resetCamera(int newHeight, int newWidth, glm::vec3 position)
+void SubmarineCamera::resetCamera(int newHeight, int newWidth, glm::vec3 position)
 {
 	height = newHeight;
 	width = newWidth;
@@ -43,12 +43,12 @@ void Camera::resetCamera(int newHeight, int newWidth, glm::vec3 position)
 	updateCameraVectors();
 }
 
-glm::mat4 Camera::getViewMatrix()
+glm::mat4 SubmarineCamera::getViewMatrix() const 
 {
 	return glm::lookAt(cameraPosition, cameraPosition + cameraFront, cameraUp);
 }
 
-glm::mat4 Camera::getProjectionMatrix()
+glm::mat4 SubmarineCamera::getProjectionMatrix() const 
 {
 	glm::mat4 Proj = glm::mat4(1);
 
@@ -58,7 +58,7 @@ glm::mat4 Camera::getProjectionMatrix()
 	return Proj;
 }
 
-glm::vec3 Camera::getDirectionVector()
+glm::vec3 SubmarineCamera::getDirectionVector()
 {
 	glm::vec3 direction;
 
@@ -69,7 +69,12 @@ glm::vec3 Camera::getDirectionVector()
 	return direction;
 }
 
-void Camera::updateCameraVectors()
+glm::vec3 SubmarineCamera::getPosition() const
+{
+	return cameraPosition;
+}
+
+void SubmarineCamera::updateCameraVectors()
 {
 	glm::vec3 direction;
 
@@ -82,7 +87,7 @@ void Camera::updateCameraVectors()
 	cameraUp = glm::normalize(glm::cross(cameraRight, cameraFront));
 }
 
-void Camera::Reshape(int windowWidth, int windowHeight)
+void SubmarineCamera::Reshape(int windowWidth, int windowHeight)
 {
 	width = windowWidth;
 	height = windowHeight;
@@ -91,12 +96,12 @@ void Camera::Reshape(int windowWidth, int windowHeight)
 	glViewport(0, 0, windowWidth, windowHeight);
 }
 
-float Camera::getYaw()
+float SubmarineCamera::getYaw()
 {
 	return yaw;
 }
 
-float Camera::getPitch()
+float SubmarineCamera::getPitch()
 {
 	return pitch;
 }

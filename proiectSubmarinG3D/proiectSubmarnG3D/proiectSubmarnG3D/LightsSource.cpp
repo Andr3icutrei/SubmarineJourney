@@ -1,27 +1,40 @@
 #include "LightSource.h"
 
-void LightSource::rotate(double deltaTime,Shader& Shader)
+void LightSource::rotate(double deltaTime,Shader& Shader,const glm::mat4& viewMatrix)
 {
 	m_rotateAngle += m_rotateSpeed * deltaTime;
 	if (m_rotateAngle > 360.f)
 		m_rotateAngle -= 360.f;
 
 	m_rotateAngle += 0.001f;
-	Shader.use();
+
 	m_mat=glm::mat4(1.0f);
-	m_mat=glm::translate(m_mat, glm::vec3(-3.0f, 4.0f, -10.0f));
+
+	m_mat=glm::translate(m_mat, m_position);
+
 	m_mat=glm::rotate(m_mat, glm::radians(m_rotateAngle), glm::vec3(0.0f, 0.5f, 0.0f));
+
+	m_mat = glm::scale(m_mat, m_scale);
+
+	glm::vec4 transformedPosition = m_mat * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
+	m_position = glm::vec3(transformedPosition);
+
+	glm::vec3 lightPosInViewSpace = glm::vec3(viewMatrix * glm::vec4(m_position, 1.0f));
+	Shader.SetVec3("lightPos", lightPosInViewSpace);
+
+	Shader.setMat4("model", m_mat);
+}
+
+void LightSource::appear(Shader& Shader)
+{
+	m_mat=glm::translate(m_mat, m_position);
 	m_mat = glm::scale(m_mat, m_scale);
 	Shader.setMat4("model", m_mat);
 	m_model.Draw(Shader);
 }
 
-void LightSource::appear(Shader& Shader)
+void LightSource::draw(Shader& Shader)
 {
-	Shader.use();
-	m_mat=glm::translate(m_mat, glm::vec3(-3.0f, 4.0f, 0.0f));
-	m_mat = glm::scale(m_mat, m_scale);
-	Shader.setMat4("model", m_mat);
 	m_model.Draw(Shader);
 }
 

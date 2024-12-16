@@ -57,18 +57,15 @@ private:
 
     std::string m_currentPath;
 
-    std::shared_ptr<Submarine> submarine;
-    std::shared_ptr<SubmarineCamera> submarineCamera;
-    std::shared_ptr<SideviewCamera> sideCamera;
-    std::shared_ptr<ICamera> camera;
-    std::shared_ptr<Water> water;
-    std::shared_ptr<LightSource> lightSource;
+    std::shared_ptr<Submarine> m_submarine;
+    std::shared_ptr<SubmarineCamera> m_submarineCamera;
+    std::shared_ptr<SideviewCamera> m_sideCamera;
+    std::shared_ptr<ICamera> m_camera;
+    std::shared_ptr<Water> m_water;
+    std::shared_ptr<LightSource> m_lightSource;
 
-    std::shared_ptr<Shader> lightingShader;
-
-    std::shared_ptr<Shader> lightingWithTextureShader;
-
-    std::shared_ptr < Shader> lampShader;
+    std::shared_ptr<Shader> m_submarineShader;
+    std::shared_ptr<Shader> m_lightSourceShader;
 
     std::shared_ptr < Shader> waterShader;
 
@@ -98,10 +95,10 @@ public:
     GLuint getViewMatrixLocation() const { return ViewMatrixLocation; }
     GLuint getWorldMatrixLocation() const { return WorldMatrixLocation; }
 
-    std::shared_ptr<Submarine> getSubmarine() { return submarine; }
-    std::shared_ptr<SubmarineCamera> getSubmarineCamera() { return submarineCamera; }
-    std::shared_ptr<SideviewCamera> getSideCamera() { return sideCamera; }
-    std::shared_ptr<ICamera> getCamera() const { return camera; }
+    std::shared_ptr<Submarine> getSubmarine() { return m_submarine; }
+    std::shared_ptr<SubmarineCamera> getSubmarineCamera() { return m_submarineCamera; }
+    std::shared_ptr<SideviewCamera> getSideCamera() { return m_sideCamera; }
+    std::shared_ptr<ICamera> getCamera() const { return m_camera; }
 
     double getDeltaTime() const { return deltaTime; }
     double getLastFrame() const { return lastFrame; }
@@ -111,10 +108,10 @@ public:
     void setViewMatrixLocation(GLuint value) { ViewMatrixLocation = value; }
     void setWorldMatrixLocation(GLuint value) { WorldMatrixLocation = value; }
 
-    void setSubmarine(std::shared_ptr<Submarine> sub) { submarine = std::move(sub); }
-    void setSubmarineCamera(std::shared_ptr<SubmarineCamera> cam) { submarineCamera = cam; }
-    void setSideCamera(std::shared_ptr<SideviewCamera> cam) { sideCamera = cam; }
-    void setCamera(std::shared_ptr<ICamera> cam) { camera = std::move(cam); }
+    void setSubmarine(std::shared_ptr<Submarine> sub) { m_submarine = std::move(sub); }
+    void setSubmarineCamera(std::shared_ptr<SubmarineCamera> cam) { m_submarineCamera = std::move(cam); }
+    void setSideCamera(std::shared_ptr<SideviewCamera> cam) { m_sideCamera = std::move(cam); }
+    void setCamera(std::shared_ptr<ICamera> cam) { m_camera = std::move(cam); }
 
     void setDeltaTime(double time) { deltaTime = time; }
     void setLastFrame(double time) { lastFrame = time; }

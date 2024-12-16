@@ -26,16 +26,16 @@ void RunProgram::run()
 void RunProgram::initializeCameras()
 {
 	m_submarinePosition = glm::vec3(0.0, 0.0, 3.0);
-	submarineCamera=std::make_shared<SubmarineCamera>(m_SCR_HEIGHT, m_SCR_WIDTH,m_submarinePosition);
+	m_submarineCamera =std::make_shared<SubmarineCamera>(m_SCR_HEIGHT, m_SCR_WIDTH,m_submarinePosition);
 
 	m_sideCameraPosition = glm::vec3(7.0f, 3.0f, 0.0f);
 	m_sideCameraTarget = glm::vec3(0.0f, 0.0f, 0.0f);
 	m_sideCameraWorldUp = glm::vec3(0.0f, 1.0f, 0.0f);
 
-	sideCamera=std::make_shared<SideviewCamera>(m_sideCameraPosition,m_sideCameraTarget, m_sideCameraWorldUp,
+	m_sideCamera =std::make_shared<SideviewCamera>(m_sideCameraPosition,m_sideCameraTarget, m_sideCameraWorldUp,
 		m_SCR_WIDTH, m_SCR_HEIGHT);
 
-	camera =submarineCamera;
+	m_camera = m_submarineCamera;
 }
 
 void RunProgram::render()
@@ -53,41 +53,41 @@ void RunProgram::render()
 		glDepthMask(GL_TRUE);
 		glEnable(GL_DEPTH_TEST);
 
-		lightingWithTextureShader->use();
-		lightingWithTextureShader->SetVec3("objectColor", 0.5f, 1.0f, 0.31f);
-		lightingWithTextureShader->SetVec3("lightColor", lightSource->getLightColor());
+		m_lightSourceShader->use();
+		m_lightSourceShader->SetVec3("objectColor", 0.5f, 1.0f, 0.31f);
+		m_lightSourceShader->SetVec3("lightColor", m_lightSource->getLightColor());
 
-		lightingWithTextureShader->SetVec3("viewPos", camera->getPosition());
-		lightingWithTextureShader->setInt("texture_diffuse1", 0);
+		m_lightSourceShader->SetVec3("viewPos", m_camera->getPosition());
+		m_lightSourceShader->setInt("texture_diffuse1", 0);
 
-		lightSource->rotate(deltaTime, lightingWithTextureShader, camera->getViewMatrix());
-		lightSource->draw(lightingWithTextureShader);
+		m_lightSource->rotate(deltaTime, m_lightSourceShader, m_camera->getViewMatrix());
+		m_lightSource->draw(m_lightSourceShader);
 
-		if (std::shared_ptr<SubmarineCamera> subCam = std::dynamic_pointer_cast<SubmarineCamera>(camera))
+		if (std::shared_ptr<SubmarineCamera> subCam = std::dynamic_pointer_cast<SubmarineCamera>(m_camera))
 		{
-			lightingWithTextureShader->setMat4("projection", subCam->getProjectionMatrix());
-			lightingWithTextureShader->setMat4("view", subCam->getViewMatrix());
-			lightingWithTextureShader->setMat4("model", submarine->getModel());
+			m_submarineShader ->setMat4("projection", subCam->getProjectionMatrix());
+			m_submarineShader->setMat4("view", subCam->getViewMatrix());
+			m_submarineShader->setMat4("model", m_submarine->getModel());
 		}
-		else if (std::shared_ptr<SideviewCamera> sideCam = std::dynamic_pointer_cast<SideviewCamera>(camera))
+		else if (std::shared_ptr<SideviewCamera> sideCam = std::dynamic_pointer_cast<SideviewCamera>(m_camera))
 		{
 			glm::mat4 projection = glm::perspective(glm::radians(75.0f), (float)m_SCR_WIDTH / m_SCR_HEIGHT, 0.1f, 100.0f);
-			lightingWithTextureShader->setMat4("projection", projection);
-			lightingWithTextureShader->setMat4("view", sideCam->getViewMatrix());
-			lightingWithTextureShader->setMat4("model", submarine->getModel());
+			m_submarineShader->setMat4("projection", projection);
+			m_submarineShader->setMat4("view", sideCam->getViewMatrix());
+			m_submarineShader->setMat4("model", m_submarine->getModel());
 		}
 
 		//submarine.draw();
-		submarine->draw();
+		m_submarine->draw();
 
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glDepthMask(GL_FALSE);
 		waterShader->use();
-		waterShader->setMat4("view", camera->getViewMatrix());
-		waterShader->setMat4("projection", camera->getProjectionMatrix());
-		waterShader->SetVec3("lightColor", lightSource->getLightColor());
-		water->draw(waterShader);
+		waterShader->setMat4("view", m_camera->getViewMatrix());
+		waterShader->setMat4("projection", m_camera->getProjectionMatrix());
+		waterShader->SetVec3("lightColor", m_lightSource->getLightColor());
+		m_water->draw(waterShader);
 		glDepthMask(GL_TRUE);
 		glDisable(GL_BLEND);
 
@@ -201,14 +201,10 @@ void RunProgram::initializePaths()
 	std::wstring_convert<std::codecvt_utf8<wchar_t>> converter;
 	m_currentPath = converter.to_bytes(wscurrentPath);
 
-	lightingShader= std::make_shared<Shader>((m_currentPath + "\\Shaders\\PhongLight.vs").c_str(), (m_currentPath + "\\Shaders\\PhongLight.fs").c_str());
-
-	lightingWithTextureShader= std::make_shared<Shader>((m_currentPath + "\\Shaders\\PhongLightWithTexture.vs").c_str(), (m_currentPath + "\\Shaders\\PhongLightWithTexture.fs").c_str());
-
-	lampShader= std::make_shared<Shader>((m_currentPath + "\\Shaders\\Lamp.vs").c_str(), (m_currentPath + "\\Shaders\\Lamp.fs").c_str());
+	m_submarineShader= std::make_shared<Shader>((m_currentPath + "\\Shaders\\PhongLightWithTexture.vs").c_str(), (m_currentPath + "\\Shaders\\PhongLightWithTexture.fs").c_str());
+	m_lightSourceShader = std::make_shared<Shader>((m_currentPath + "\\Shaders\\PhongLightWithTexture.vs").c_str(), (m_currentPath + "\\Shaders\\PhongLightWithTexture.fs").c_str());
 
 	waterShader= std::make_shared<Shader>((m_currentPath + "\\Shaders\\Water.vs").c_str(), (m_currentPath + "\\Shaders\\Water.fs").c_str());;
-
 }
 
 void RunProgram::createWater()
@@ -219,13 +215,13 @@ void RunProgram::createWater()
 	std::string strSandJpgPath = m_currentPath + "\\x64\\Debug\\sand.jpg";
 	const char* sandPath{ strSandJpgPath.c_str() };
 
-	water = std::make_shared<Water>(glm::vec3(0.0f, -4.0f, 3.0f), glm::vec3(50.0f, 8.0f, 50.0f), waterPath, sandPath);
+	m_water = std::make_shared<Water>(glm::vec3(0.0f, -4.0f, 3.0f), glm::vec3(50.0f, 8.0f, 50.0f), waterPath, sandPath);
 }
 
 void RunProgram::createSubmarine()
 {
 	std::string submarineFileName = (m_currentPath + "\\Models\\Submarin\\submarin.obj");
-	submarine = std::make_shared<Submarine>(submarineFileName, lightingWithTextureShader);
+	m_submarine = std::make_shared<Submarine>(submarineFileName, m_submarineShader);
 }
 
 void RunProgram::createLightSource()
@@ -250,7 +246,7 @@ void RunProgram::createLightSource()
 		lightSourcePath += "\\Models\\Moon\\Moon.obj";
 		lightSourceScale=(glm::vec3(0.2f, 0.2f, 0.2f));
 	}
-	lightSource=std::make_shared<LightSource>(lightSourcePath, lightingWithTextureShader, lightSourceScale);
-	lightSource->setPosition(glm::vec3(-3.0f, 3.0f, -8.0f));
-	lightSource->setLightColor(lightColor);
+	m_lightSource=std::make_shared<LightSource>(lightSourcePath, m_lightSourceShader, lightSourceScale);
+	m_lightSource->setPosition(glm::vec3(-3.0f, 3.0f, -8.0f));
+	m_lightSource->setLightColor(lightColor);
 }

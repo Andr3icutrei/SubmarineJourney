@@ -93,35 +93,49 @@ void Water::setupWater()
 
 }
 
-void Water::loadTexture(const char* texturePath)
+void Water::loadTexture(const char* waterTexturePath, const char* sandTexturePath)
 {
+    // Load water texture
     glGenTextures(1, &textureID);
     glBindTexture(GL_TEXTURE_2D, textureID);
-
-    // Texture settings
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-    // Load the texture image
     int width, height, nrChannels;
-    unsigned char* data = stbi_load(texturePath, &width, &height, &nrChannels, 0);
+    unsigned char* data = stbi_load(waterTexturePath, &width, &height, &nrChannels, 0);
     if (data) {
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
         glGenerateMipmap(GL_TEXTURE_2D);
     }
     else {
-        std::cout << "Failed to load texture: " << texturePath << std::endl;
+        std::cout << "Failed to load water texture: " << waterTexturePath << std::endl;
+    }
+    stbi_image_free(data);
+
+    // Load sand texture
+    glGenTextures(1, &sandTextureID);
+    glBindTexture(GL_TEXTURE_2D, sandTextureID);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    data = stbi_load(sandTexturePath, &width, &height, &nrChannels, 0);
+    if (data) {
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+        glGenerateMipmap(GL_TEXTURE_2D);
+    }
+    else {
+        std::cout << "Failed to load sand texture: " << sandTexturePath << std::endl;
     }
     stbi_image_free(data);
 }
 
-Water::Water(const glm::vec3& position, const glm::vec3& scale, const char* texturePath)
+Water::Water(const glm::vec3& position, const glm::vec3& scale, const char* waterTexturePath, const char* sandTexturePath)
     : position(position), scale(scale)
 {
     setupWater();
-    loadTexture(texturePath);
+    loadTexture(waterTexturePath,sandTexturePath);
 }
 
 Water::~Water() {
@@ -129,6 +143,7 @@ Water::~Water() {
     glDeleteBuffers(1, &VBO);
     glDeleteBuffers(1, &EBO);
     glDeleteTextures(1, &textureID);
+    glDeleteTextures(1, &sandTextureID);
 }
 
 void Water::draw(Shader& shader)
@@ -142,12 +157,29 @@ void Water::draw(Shader& shader)
 
     shader.setMat4("model", model);
 
-    // Bind texture
+    glBindVertexArray(VAO);
+
+    // Bind water and sand textures
+    shader.setInt("waterTexture", 0);
+    shader.setInt("sandTexture", 1);
+
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, textureID);
 
-    // Draw the cuboid
-    glBindVertexArray(VAO);
-    glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, sandTextureID);
+
+    for (int i = 0; i < 6; ++i) {
+        if (i == 5) { // Bottom face
+            shader.setInt("isBottomFace", 1);
+        }
+        else {
+            shader.setInt("isBottomFace", 0);
+        }
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, (void*)(i * 6 * sizeof(unsigned int)));
+    }
+
     glBindVertexArray(0);
 }
+
+

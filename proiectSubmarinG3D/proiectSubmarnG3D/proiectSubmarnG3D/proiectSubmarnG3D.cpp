@@ -134,7 +134,8 @@ int main()
 	glewInit();
 
 	glEnable(GL_DEPTH_TEST);
-
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	//Create submarine	
 	submarine = new Submarine();
@@ -158,9 +159,14 @@ int main()
 	Shader lampShader((currentPath + "\\Shaders\\Lamp.vs").c_str(), (currentPath + "\\Shaders\\Lamp.fs").c_str());
 	
 	Shader waterShader((currentPath+"\\Shaders\\Water.vs").c_str(), (currentPath + "\\Shaders\\Water.fs").c_str());
+
 	std::string strWaterJpgPath = currentPath + "\\x64\\Debug\\water.jpg";
 	const char* waterPath{ strWaterJpgPath.c_str()};
-	Water water(glm::vec3(0.0f, 1.0f, 3.0f), glm::vec3(10.0f, 10.0f, 10.0f), waterPath);
+
+	std::string strSandJpgPath = currentPath + "\\x64\\Debug\\sand.jpg";
+	const char* sandPath{ strSandJpgPath.c_str() };
+
+	Water water(glm::vec3(0.0f, -4.0f, 3.0f), glm::vec3(50.0f, 8.0f, 50.0f), waterPath,sandPath);
 
 	glm::mat4 submarineModel = glm::mat4(1.0f);
 	std::string submarineFileName = (currentPath + "\\Models\\Submarin\\submarin.obj");
@@ -186,8 +192,10 @@ int main()
 		lightSourcePath += "\\Models\\Moon\\Moon.obj";
 		lightSourceScale = glm::vec3(0.2f, 0.2f, 0.2f);
 	}
-
-	glDepthMask(true);
+	glDisable(GL_CULL_FACE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glDepthMask(GL_TRUE);
 	LightSource lightSource(lightSourcePath,lightingWithTextureShader,lightSourceScale);
 	lightSource.setPosition(glm::vec3(-3.0f, 3.0f, -8.0f));
 
@@ -201,13 +209,9 @@ int main()
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		waterShader.use();
-		waterShader.setMat4("view", camera->getViewMatrix());
-		waterShader.setMat4("projection", camera->getProjectionMatrix());
-
-
-		// Draw water
-		water.draw(waterShader);
+		glDisable(GL_BLEND);          
+		glDepthMask(GL_TRUE);         
+		glEnable(GL_DEPTH_TEST);
 
 		lightingWithTextureShader.use();
 		lightingWithTextureShader.SetVec3("objectColor", 0.5f, 1.0f, 0.31f);
@@ -236,6 +240,17 @@ int main()
 		}
 
 		submarineObjModel.Draw(lightingWithTextureShader);
+
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		glDepthMask(GL_FALSE);
+		waterShader.use();
+		waterShader.setMat4("view", camera->getViewMatrix());
+		waterShader.setMat4("projection", camera->getProjectionMatrix());
+		waterShader.SetVec3("lightColor", lightColor);
+		water.draw(waterShader);
+		glDepthMask(GL_TRUE);
+		glDisable(GL_BLEND);
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();

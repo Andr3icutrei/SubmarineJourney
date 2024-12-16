@@ -12,6 +12,7 @@ uniform sampler2D texture1;  // Cube texture
 
 void main()
 {
+    float ambientStrength = 0.6;
     // Lighting calculations
     vec3 norm = normalize(Normal);
     vec3 lightDir = normalize(lightPos - FragPos);
@@ -23,7 +24,7 @@ void main()
     float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32);
 
     // Combine the results
-    vec3 ambient = 0.1 * vec3(texture(texture1, TexCoord));  // Ambient lighting
+    vec3 ambient = 0.6 * vec3(texture(texture1, TexCoord));  // Ambient lighting
     vec3 diffuse = diff * vec3(texture(texture1, TexCoord));  // Diffuse lighting
     vec3 specular = spec * vec3(1.0);  // Specular lighting
 

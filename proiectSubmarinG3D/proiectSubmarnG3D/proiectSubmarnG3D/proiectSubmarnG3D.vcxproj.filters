@@ -79,6 +79,30 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+    <None Include="..\Shaders\Lamp.fs">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\Shaders\Lamp.vs">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\Shaders\PhongLight.fs">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\Shaders\PhongLight.vs">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\Shaders\PhongLightWithTexture.fs">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\Shaders\PhongLightWithTexture.vs">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\Shaders\Water.fs">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\Shaders\Water.vs">
+      <Filter>Shaders</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Source Files">
@@ -86,6 +110,9 @@
     </Filter>
     <Filter Include="Header Files">
       <UniqueIdentifier>{903b44a1-63e0-415a-a0a1-9c84557d7ff2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders">
+      <UniqueIdentifier>{7b45d5b8-b224-4520-a468-f749ca7825a9}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

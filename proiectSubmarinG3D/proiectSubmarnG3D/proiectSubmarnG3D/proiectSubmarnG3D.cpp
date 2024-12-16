@@ -160,7 +160,7 @@ int main()
 	Shader waterShader((currentPath+"\\Shaders\\Water.vs").c_str(), (currentPath + "\\Shaders\\Water.fs").c_str());
 	std::string strWaterJpgPath = currentPath + "\\x64\\Debug\\water.jpg";
 	const char* waterPath{ strWaterJpgPath.c_str()};
-	Water water(glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(10.0f, 10.0f, 50.0f), waterPath);
+	Water water(glm::vec3(0.0f, 1.0f, 3.0f), glm::vec3(10.0f, 10.0f, 10.0f), waterPath);
 
 	glm::mat4 submarineModel = glm::mat4(1.0f);
 	std::string submarineFileName = (currentPath + "\\Models\\Submarin\\submarin.obj");
@@ -174,7 +174,7 @@ int main()
 
 	glm::vec3 lightSourceScale;
 	glm::vec3 lightColor;
-	if (!(hour >= 6 && hour <= 18))
+	if (hour >= 6 && hour <= 18)
 	{
 		lightColor = glm::vec3(1.0f, 0.95f, 0.6f);//sun light color
 		lightSourcePath += "\\Models\\Sun\\sun.obj";

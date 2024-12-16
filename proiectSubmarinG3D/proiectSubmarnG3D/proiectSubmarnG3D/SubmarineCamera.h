@@ -58,6 +58,8 @@ public:
 	int width;
 
 	SubmarineCamera(int newHeight, int newWidth, glm::vec3 position);
+	SubmarineCamera& operator=(const SubmarineCamera& other);
+	SubmarineCamera(const SubmarineCamera& other);
 
 	void updateCamera(glm::vec3 position, glm::vec3 forwardDirection, float newYaw, float newPitch);
 	void resetCamera(int newHeight, int newWidth, glm::vec3 position);

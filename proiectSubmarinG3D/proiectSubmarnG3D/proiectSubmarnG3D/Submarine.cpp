@@ -1,16 +1,85 @@
 #include "Submarine.h"
 
-Submarine::Submarine()
+Submarine::Submarine(std::string fileName, std::shared_ptr<Shader> shader)
 	: submarineModel(1.0f),
 	yaw(-90.0f),
 	pitch(0.0f),
 	roll(0.0f),
-	movementSpeed(100.0f),
+	movementSpeed(20.0f),
 	submarineScale(0.2f),
-	submarinePosition(0.0f)
+	submarinePosition(0.0f),
+	m_model(fileName,false),
+	m_shader(std::move(shader))// here is the error
 {
+
 	updateForwardDirection();
 	updateSubmarineDirection();
+}
+
+Submarine::Submarine(const Submarine& other):
+	submarineModel(other.submarineModel),
+	submarinePosition(other.submarinePosition),
+	forwardDirection(other.forwardDirection),
+	submarineScale(other.submarineScale),
+	yaw(other.yaw),
+	pitch(other.pitch),
+	roll(other.roll),
+	movementSpeed(other.movementSpeed),
+	m_model{other.m_model}
+{
+}
+
+Submarine& Submarine::operator=(const Submarine& other)
+{
+	if (this != &other) {
+		submarineModel = other.submarineModel;
+		submarinePosition = other.submarinePosition;
+		forwardDirection = other.forwardDirection;
+		submarineScale = other.submarineScale;
+		yaw = other.yaw;
+		pitch = other.pitch;
+		roll = other.roll;
+		movementSpeed = other.movementSpeed;
+	}
+	return *this;
+}
+
+Submarine::Submarine(Submarine&& other) noexcept: 
+	submarineModel(std::move(other.submarineModel)),
+	submarinePosition(std::move(other.submarinePosition)),
+	forwardDirection(std::move(other.forwardDirection)),
+	submarineScale(std::move(other.submarineScale)),
+	yaw(other.yaw),
+	pitch(other.pitch),
+	roll(other.roll),
+	movementSpeed(other.movementSpeed),
+	m_model{other.m_model}
+{
+	other.yaw = 0.0f;
+	other.pitch = 0.0f;
+	other.roll = 0.0f;
+	other.movementSpeed = 0.0f;
+}
+
+Submarine& Submarine::operator=(Submarine&& other) noexcept
+{
+	if (this != &other) {
+
+		submarineModel = std::move(other.submarineModel);
+		submarinePosition = std::move(other.submarinePosition);
+		forwardDirection = std::move(other.forwardDirection);
+		submarineScale = std::move(other.submarineScale);
+		yaw = other.yaw;
+		pitch = other.pitch;
+		roll = other.roll;
+		movementSpeed = other.movementSpeed;
+
+		other.yaw = 0.0f;
+		other.pitch = 0.0f;
+		other.roll = 0.0f;
+		other.movementSpeed = 0.0f;
+	}
+	return *this;
 }
 
 void Submarine::updateSubmarine(Dir dir, double dt)
@@ -83,6 +152,8 @@ void Submarine::updateSubmarine(Dir dir, double dt)
 	updateForwardDirection();
 
 	updateSubmarineDirection();
+
+	m_model.Draw(m_shader);
 }
 
 glm::mat4 Submarine::getModel()
@@ -108,6 +179,11 @@ float Submarine::getYaw()
 float Submarine::getPitch()
 {
 	return pitch;
+}
+
+void Submarine::draw()
+{
+	m_model.Draw(m_shader);
 }
 
 void Submarine::updateForwardDirection()

@@ -12,6 +12,24 @@ SideviewCamera::SideviewCamera(glm::vec3 pos, glm::vec3 target, glm::vec3 worldU
 	m_projectionMatrix = glm::perspective(glm::radians(m_fov), m_aspectRatio, m_nearPlane, m_farPlane);
 }
 
+SideviewCamera& SideviewCamera::operator=(const SideviewCamera& other)
+{
+    if (this != &other) {  // Avoid self-assignment
+        m_position = other.m_position;
+        m_target = other.m_target;
+        m_worldUp = other.m_worldUp;
+
+        // Cannot assign to const members, so don't attempt to copy them
+        // Instead, initialize them based on constructor or other logic
+        // e.g., initialize new object with similar values (if needed).
+
+        m_projectionMatrix = other.m_projectionMatrix;
+        m_width = other.m_width;
+        m_height = other.m_height;
+    }
+    return *this;
+}
+
 void SideviewCamera::Reshape(int windowWidth, int windowHeight)
 {
 	m_width = windowWidth;

@@ -22,7 +22,7 @@ public:
     Model(string const& path, bool bSmoothNormals, bool gamma = false);
 
     // draws the model, and thus all its meshes
-    virtual void Draw(Shader& shader);
+    virtual void Draw(std::shared_ptr<Shader>& shader);
 
 private:
     // loads a model with supported ASSIMP extensions from file and stores the resulting meshes in the meshes vector.

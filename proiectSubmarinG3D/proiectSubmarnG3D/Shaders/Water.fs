@@ -5,48 +5,42 @@ in vec2 TexCoord;
 in vec3 FragPos;
 in vec3 Normal;
 
-uniform vec3 lightPos;  // Light position
-uniform vec3 viewPos;   // Camera position
+uniform vec3 lightPos; 
+uniform vec3 viewPos;  
 uniform vec3 lightColor;
-uniform vec3 objectColor;
 
-uniform sampler2D waterTexture;  // Water texture
-uniform sampler2D sandTexture;   // Sand texture
-uniform int isBottomFace;        // 1 if bottom face, 0 otherwise
+uniform sampler2D waterTexture; 
+uniform sampler2D sandTexture;  
+uniform int isBottomFace;        
 
 void main()
 {
-    float ambientStrength = 0.8;
-    float diffuseStrength = 0.9;
-    float specularStrength = 0.7;
+    float ambientStrength = 0.6;
+    float diffuseStrength = 0.7;
+    float specularStrength = 0.8;
 
-    // Choose the appropriate texture based on isBottomFace
     vec4 baseColor;
     if (isBottomFace == 1) {
-        baseColor = texture(sandTexture, TexCoord);  // Use sand texture
+        baseColor = texture(sandTexture, TexCoord);  
     } else {
-        baseColor = texture(waterTexture, TexCoord); // Use water texture
+        baseColor = texture(waterTexture, TexCoord);
     }
 
-    // Lighting calculations
     vec3 norm = normalize(Normal);
     vec3 lightDir = normalize(lightPos - FragPos);
     float diff = max(dot(norm, lightDir), 0.0);
 
-    // Specular highlight
     vec3 viewDir = normalize(viewPos - FragPos);
     vec3 reflectDir = reflect(-lightDir, norm);
     float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32);
 
-    // Combine the results
-    vec3 ambient = ambientStrength * vec3(baseColor);                   // Ambient lighting
-    vec3 diffuse = diffuseStrength * diff * vec3(baseColor);           // Diffuse lighting
-    vec3 specular = specularStrength * spec * lightColor * vec3(1.0);               // Specular lighting
+    vec3 ambient = ambientStrength * vec3(baseColor);                  
+    vec3 diffuse = diffuseStrength * diff * vec3(baseColor);           
+    vec3 specular = specularStrength * spec * vec3(1.0);            
 
     vec3 result = ambient + diffuse + specular;
 
-    // Adjust the alpha value to make the texture partially transparent
-    float alpha = baseColor.a * 0.5;  // 50% transparency with texture alpha
+    float alpha = baseColor.a * 0.5;  
 
     FragColor = vec4(result, alpha);
 }

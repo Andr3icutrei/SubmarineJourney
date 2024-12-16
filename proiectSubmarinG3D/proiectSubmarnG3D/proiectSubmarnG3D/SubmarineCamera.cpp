@@ -18,6 +18,56 @@ SubmarineCamera::SubmarineCamera(int newHeight, int newWidth, glm::vec3 position
 	updateCameraVectors();
 }
 
+SubmarineCamera& SubmarineCamera::operator=(const SubmarineCamera& other)
+{
+	if (this != &other) {  // Avoid self-assignment
+		// Copy assignable members
+		cameraPosition = other.cameraPosition;
+		cameraOffset = other.cameraOffset;
+		cameraFront = other.cameraFront;
+		cameraUp = other.cameraUp;
+		cameraRight = other.cameraRight;
+		worldUp = other.worldUp;
+		m_projectionMatrix = other.m_projectionMatrix;
+
+		yaw = other.yaw;
+		pitch = other.pitch;
+		rotationSpeed = other.rotationSpeed;
+		movementSpeed = other.movementSpeed;
+		fov = other.fov;
+		znear = other.znear;
+		zfar = other.zfar;
+		height = other.height;
+		width = other.width;
+
+		// Note: Const members (zNEAR, zFAR, YAW, PITCH, FOV) are not copied,
+		// as they are constants and should remain unchanged.
+	}
+	return *this;
+}
+
+SubmarineCamera::SubmarineCamera(const SubmarineCamera& other):
+    cameraPosition(other.cameraPosition),
+	cameraOffset(other.cameraOffset),
+	cameraFront(other.cameraFront),
+	cameraUp(other.cameraUp),
+	cameraRight(other.cameraRight),
+	worldUp(other.worldUp),
+	m_projectionMatrix(other.m_projectionMatrix),
+	yaw(other.yaw),
+	pitch(other.pitch),
+	rotationSpeed(other.rotationSpeed),
+	movementSpeed(other.movementSpeed),
+	fov(other.fov),
+	znear(other.znear),
+	zfar(other.zfar),
+	height(other.height),
+	width(other.width)
+{
+	// Copy all member variables from 'other' to this instance
+}
+
+
 void SubmarineCamera::updateCamera(glm::vec3 position, glm::vec3 forwardDirection, float newYaw, float newPitch)
 {
 	cameraPosition = position - forwardDirection * cameraOffset.z + glm::vec3(0.0f, cameraOffset.y, 0.0f);

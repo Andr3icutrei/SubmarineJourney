@@ -5,6 +5,7 @@
 #include "IObject.h"
 #include "stb_image.h"
 #include <string>
+#include "memory"
 
 class Water {
 private:
@@ -21,6 +22,6 @@ public:
     Water(const glm::vec3& position, const glm::vec3& scale, const char* texturePath, const char* sandTexturePath);
     ~Water();
 
-    void draw(Shader& shader);
+    void draw(std::shared_ptr<Shader> shader);
 };
 

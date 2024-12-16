@@ -23,6 +23,7 @@ private:
     int m_height;
 public:
     SideviewCamera(glm::vec3 pos, glm::vec3 target, glm::vec3 worldUp,const int width,const int height);
+    SideviewCamera& operator=(const SideviewCamera& other);
     void setPosition(glm::vec3 pos) { m_position = pos; }
     void setTarget(glm::vec3 target) { m_target = target; }
     void setWorldUp(glm::vec3 worldUp) { m_worldUp = worldUp; }

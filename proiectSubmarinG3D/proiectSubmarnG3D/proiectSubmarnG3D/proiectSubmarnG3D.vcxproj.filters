@@ -4,9 +4,6 @@
     <ClCompile Include="SubmarineCamera.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="FlyingCube.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Mesh.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -25,22 +22,24 @@
     <ClCompile Include="Submarine.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="LightsSource.cpp">
+    <ClCompile Include="LightSource.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ICamera.cpp" />
     <ClCompile Include="SideviewCamera.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Water.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="ICamera.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="RunProgram.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="SubmarineCamera.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="FlyingCube.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="IObject.h">
@@ -74,6 +73,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="ICamera.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="RunProgram.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

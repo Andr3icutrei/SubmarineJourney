@@ -52,7 +52,7 @@ Mesh::Mesh(std::string name, unsigned int numVertices, std::shared_ptr <Vertex> 
 }
 
 // render the mesh
-void Mesh::Draw(Shader& shader)
+void Mesh::Draw(std::shared_ptr<Shader>& shader)
 {
    //std::cout << "start drawing " << std::endl;
 
@@ -78,7 +78,7 @@ void Mesh::Draw(Shader& shader)
 
      // now set the sampler to the correct texture unit
       std::string textureName = (name + number);
-      int location = glGetUniformLocation(shader.ID, textureName.c_str());
+      int location = glGetUniformLocation(shader->ID, textureName.c_str());
       if (location != -1) {
          glUniform1i(location, i);
          // and finally bind the texture

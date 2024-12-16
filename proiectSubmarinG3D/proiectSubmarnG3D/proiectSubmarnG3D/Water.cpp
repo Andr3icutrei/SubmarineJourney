@@ -146,22 +146,22 @@ Water::~Water() {
     glDeleteTextures(1, &sandTextureID);
 }
 
-void Water::draw(Shader& shader)
+void Water::draw(std::shared_ptr<Shader> shader)
 {
-    shader.use();
+    shader->use();
 
     // Model matrix for scaling and positioning
     glm::mat4 model = glm::mat4(1.0f);
     model = glm::translate(model, position);
     model = glm::scale(model, scale);
 
-    shader.setMat4("model", model);
+    shader->setMat4("model", model);
 
     glBindVertexArray(VAO);
 
     // Bind water and sand textures
-    shader.setInt("waterTexture", 0);
-    shader.setInt("sandTexture", 1);
+    shader->setInt("waterTexture", 0);
+    shader->setInt("sandTexture", 1);
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, textureID);
@@ -171,10 +171,10 @@ void Water::draw(Shader& shader)
 
     for (int i = 0; i < 6; ++i) {
         if (i == 5) { // Bottom face
-            shader.setInt("isBottomFace", 1);
+            shader->setInt("isBottomFace", 1);
         }
         else {
-            shader.setInt("isBottomFace", 0);
+            shader->setInt("isBottomFace", 0);
         }
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, (void*)(i * 6 * sizeof(unsigned int)));
     }

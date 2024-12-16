@@ -14,14 +14,15 @@ private:
 	float m_rotateSpeed;
 	glm::vec3 m_position;
 	glm::vec3 m_scale;
+	glm::vec3 m_lightColor;
 public:
-	LightSource(std::string& fileName,Shader& Shader,glm::vec3 scale);
+	LightSource(std::string& fileName, std::shared_ptr<Shader>& Shader,glm::vec3 scale);
 
-	void rotate(double deltaTime, Shader& Shader, const glm::mat4& viewMatrix);
+	void rotate(double deltaTime, std::shared_ptr<Shader>& Shader, const glm::mat4& viewMatrix);
 
-	void appear(Shader& Shader);
+	void appear(std::shared_ptr<Shader>& Shader);
 
-	void draw(Shader& shader);
+	void draw(std::shared_ptr<Shader>& shader);
 
 	void SetModelMatrix(glm::mat4 modelMatrix) override;
 
@@ -57,5 +58,8 @@ public:
 
 	void setScale(const glm::vec3& scale){	m_scale = scale;}
 
+	glm::vec3 getLightColor() const { return m_lightColor; }
+
+	void setLightColor(const glm::vec3& lightColor) { m_lightColor = lightColor; }
 };
 

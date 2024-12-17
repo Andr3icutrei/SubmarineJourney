@@ -31,6 +31,7 @@
 #include "SubmarineCamera.h"
 #include "SideviewCamera.h"
 #include "Water.h"
+#include "Skybox.h"
 
 class RunProgram
 {
@@ -63,11 +64,12 @@ private:
     std::shared_ptr<ICamera> m_camera;
     std::shared_ptr<Water> m_water;
     std::shared_ptr<LightSource> m_lightSource;
+    std::shared_ptr<Skybox> m_skybox;
 
     std::unique_ptr<Shader> m_submarineShader;
     std::unique_ptr<Shader> m_lightSourceShader;
-
     std::unique_ptr<Shader> m_waterShader;
+    std::unique_ptr<Shader> m_skyboxShader;
 
     double deltaTime = 0.0f;
     double lastFrame = 0.0f;
@@ -78,6 +80,7 @@ private:
     void createWater();
     void createSubmarine();
     void createLightSource();
+    void createSkybox();
     void initializeCameras();
     void render();
 public:
@@ -85,7 +88,6 @@ public:
     static RunProgram* getInstance();
 
     void run();
-
 
     //getters
     unsigned int getSCRWidth() const { return m_SCR_WIDTH; }

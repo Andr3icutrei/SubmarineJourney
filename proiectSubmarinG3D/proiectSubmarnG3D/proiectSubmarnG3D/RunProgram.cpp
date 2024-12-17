@@ -20,6 +20,7 @@ void RunProgram::run()
 	createLightSource();
 	createSubmarine();
 	createWater();
+	createSkybox();
 	render();
 }
 
@@ -40,14 +41,26 @@ void RunProgram::initializeCameras()
 
 void RunProgram::render()
 {
+
 	while (!glfwWindowShouldClose(window)) {
-		// per-frame time logic
 		double currentFrame = glfwGetTime();
 		deltaTime = currentFrame - lastFrame;
 		lastFrame = currentFrame;
 
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		glDepthMask(GL_FALSE);
+		glm::mat4 view = m_camera->getViewMatrix();
+		glm::mat4 projection = m_camera->getProjectionMatrix();
+
+		glm::mat4 scaleMatrix = glm::scale(glm::mat4(1.0f), glm::vec3(25.0f));
+		m_skyboxShader->use();
+		m_skyboxShader->setMat4("view", view);
+		m_skyboxShader->setMat4("projection", projection);
+		m_skyboxShader->setMat4("model", scaleMatrix);
+
+		m_skybox->draw(*m_skyboxShader);
 
 		glDisable(GL_BLEND);
 		glDepthMask(GL_TRUE);
@@ -181,11 +194,10 @@ void RunProgram::initializePaths()
 	std::wstring_convert<std::codecvt_utf8<wchar_t>> converter;
 	m_currentPath = converter.to_bytes(wscurrentPath);
 
-	m_submarineShader= std::make_unique<Shader>((m_currentPath + "\\Shaders\\PhongLightWithTexture.vs").c_str(), (m_currentPath + "\\Shaders\\PhongLightWithTexture.fs").c_str());
+	m_submarineShader = std::make_unique<Shader>((m_currentPath + "\\Shaders\\PhongLightWithTexture.vs").c_str(), (m_currentPath + "\\Shaders\\PhongLightWithTexture.fs").c_str());
 	m_lightSourceShader = std::make_unique<Shader>((m_currentPath + "\\Shaders\\PhongLightWithTexture.vs").c_str(), (m_currentPath + "\\Shaders\\PhongLightWithTexture.fs").c_str());
-
 	m_waterShader = std::make_unique<Shader>((m_currentPath + "\\Shaders\\Water.vs").c_str(), (m_currentPath + "\\Shaders\\Water.fs").c_str());
-
+	m_skyboxShader = std::make_unique<Shader>((m_currentPath + "\\Shaders\\Skybox.vs").c_str(), (m_currentPath + "\\Shaders\\Skybox.fs").c_str());
 }
 
 void RunProgram::createWater()
@@ -196,7 +208,7 @@ void RunProgram::createWater()
 	std::string strSandJpgPath = m_currentPath + "\\x64\\Debug\\sand.jpg";
 	const char* sandPath{ strSandJpgPath.c_str() };
 
-	m_water = std::make_shared<Water>(glm::vec3(0.0f, -4.0f, 3.0f), glm::vec3(50.0f, 8.0f, 50.0f), waterPath, sandPath);
+	m_water = std::make_shared<Water>(glm::vec3(0.0f, -4.0f, 3.0f), glm::vec3(70.0f, 8.0f, 70.0f), waterPath, sandPath);
 }
 
 void RunProgram::createSubmarine()
@@ -230,4 +242,10 @@ void RunProgram::createLightSource()
 	m_lightSource=std::make_shared<LightSource>(lightSourcePath, m_lightSourceShader, lightSourceScale);
 	m_lightSource->setPosition(glm::vec3(-3.0f, 3.0f, -8.0f));
 	m_lightSource->setLightColor(lightColor);
+}
+
+void RunProgram::createSkybox()
+{
+	std::string skyPath = m_currentPath + "\\x64\\Debug\\sky.jpg";
+	m_skybox = std::make_shared<Skybox>(skyPath.c_str());
 }

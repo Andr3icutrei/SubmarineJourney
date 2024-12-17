@@ -1,6 +1,6 @@
 #include "LightSource.h"
 
-void LightSource::rotate(double deltaTime,std::shared_ptr<Shader>& Shader,const glm::mat4& viewMatrix)
+void LightSource::rotate(double deltaTime,std::unique_ptr<Shader>& Shader,const glm::mat4& viewMatrix)
 {
 	m_rotateAngle += m_rotateSpeed * deltaTime;
 	if (m_rotateAngle > 360.f)
@@ -25,20 +25,20 @@ void LightSource::rotate(double deltaTime,std::shared_ptr<Shader>& Shader,const 
 	Shader->setMat4("model", m_mat);
 }
 
-void LightSource::appear(std::shared_ptr<Shader>& Shader)
+void LightSource::appear(std::unique_ptr<Shader>& Shader)
 {
 	m_mat=glm::translate(m_mat, m_position);
 	m_mat = glm::scale(m_mat, m_scale);
 	Shader->setMat4("model", m_mat);
-	m_model.Draw(Shader);
+	m_model.Draw(*Shader);
 }
 
-void LightSource::draw(std::shared_ptr<Shader>& Shader)
+void LightSource::draw(std::unique_ptr<Shader>& Shader)
 {
-	m_model.Draw(Shader);
+	m_model.Draw(*Shader);
 }
 
-LightSource::LightSource(std::string& fileName, std::shared_ptr<Shader>& Shader,glm::vec3 scale) :
+LightSource::LightSource(std::string& fileName, std::unique_ptr<Shader>& Shader,glm::vec3 scale) :
 	m_path{fileName} ,
 	m_model{fileName,false},
 	m_mat{glm::mat4(1.0f)},

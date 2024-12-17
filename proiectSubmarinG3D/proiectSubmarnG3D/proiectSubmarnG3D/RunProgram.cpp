@@ -56,38 +56,24 @@ void RunProgram::render()
 		m_lightSourceShader->use();
 		m_lightSourceShader->SetVec3("objectColor", 0.5f, 1.0f, 0.31f);
 		m_lightSourceShader->SetVec3("lightColor", m_lightSource->getLightColor());
-
 		m_lightSourceShader->SetVec3("viewPos", m_camera->getPosition());
 		m_lightSourceShader->setInt("texture_diffuse1", 0);
-
 		m_lightSource->rotate(deltaTime, m_lightSourceShader, m_camera->getViewMatrix());
 		m_lightSource->draw(m_lightSourceShader);
 
-		if (std::shared_ptr<SubmarineCamera> subCam = std::dynamic_pointer_cast<SubmarineCamera>(m_camera))
-		{
-			m_submarineShader ->setMat4("projection", subCam->getProjectionMatrix());
-			m_submarineShader->setMat4("view", subCam->getViewMatrix());
-			m_submarineShader->setMat4("model", m_submarine->getModel());
-		}
-		else if (std::shared_ptr<SideviewCamera> sideCam = std::dynamic_pointer_cast<SideviewCamera>(m_camera))
-		{
-			glm::mat4 projection = glm::perspective(glm::radians(75.0f), (float)m_SCR_WIDTH / m_SCR_HEIGHT, 0.1f, 100.0f);
-			m_submarineShader->setMat4("projection", projection);
-			m_submarineShader->setMat4("view", sideCam->getViewMatrix());
-			m_submarineShader->setMat4("model", m_submarine->getModel());
-		}
-
-		//submarine.draw();
-		m_submarine->draw();
+		m_submarineShader->setMat4("projection", m_camera->getProjectionMatrix());
+		m_submarineShader->setMat4("view", m_camera->getViewMatrix());
+		m_submarineShader->setMat4("model", m_submarine->getModel());
+		m_submarine->draw(*m_submarineShader);
 
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glDepthMask(GL_FALSE);
-		waterShader->use();
-		waterShader->setMat4("view", m_camera->getViewMatrix());
-		waterShader->setMat4("projection", m_camera->getProjectionMatrix());
-		waterShader->SetVec3("lightColor", m_lightSource->getLightColor());
-		m_water->draw(waterShader);
+		m_waterShader->use();
+		m_waterShader->setMat4("view", m_camera->getViewMatrix());
+		m_waterShader->setMat4("projection", m_camera->getProjectionMatrix());
+		m_waterShader->SetVec3("lightColor", m_lightSource->getLightColor());
+		m_water->draw(*m_waterShader);
 		glDepthMask(GL_TRUE);
 		glDisable(GL_BLEND);
 
@@ -114,46 +100,40 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 	std::shared_ptr<Submarine> submarine = instance->getSubmarine();
 
 	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-		RunProgram::getInstance()->getSubmarine()->updateSubmarine(Dir::LEFT, deltaTime);
+		RunProgram::getInstance()->getSubmarine()->updateSubmarine(Dir::LEFT, deltaTime, RunProgram::getInstance()->getSubmarineShader());
 
 	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-		submarine->updateSubmarine(Dir::RIGHT, deltaTime);
+		submarine->updateSubmarine(Dir::RIGHT, deltaTime, RunProgram::getInstance()->getSubmarineShader());
 
 	if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
-		submarine->updateSubmarine(Dir::UP, deltaTime);
+		submarine->updateSubmarine(Dir::UP, deltaTime, RunProgram::getInstance()->getSubmarineShader());
 
 	if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
-		submarine->updateSubmarine(Dir::DOWN, deltaTime);
+		submarine->updateSubmarine(Dir::DOWN, deltaTime, RunProgram::getInstance()->getSubmarineShader());
 
 	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-		submarine->updateSubmarine(Dir::FORWARD, deltaTime);
+		submarine->updateSubmarine(Dir::FORWARD, deltaTime, RunProgram::getInstance()->getSubmarineShader());
 
 	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
 		glfwSetWindowShouldClose(window, true);
 
 	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS &&
 		glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-		submarine->updateSubmarine(Dir::FORWARD_LEFT, deltaTime);
+		submarine->updateSubmarine(Dir::FORWARD_LEFT, deltaTime, RunProgram::getInstance()->getSubmarineShader());
 
 	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS &&
 		glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-		submarine->updateSubmarine(Dir::FORWARD_RIGHT, deltaTime);
+		submarine->updateSubmarine(Dir::FORWARD_RIGHT, deltaTime, RunProgram::getInstance()->getSubmarineShader());
 
 	std::shared_ptr<ICamera> camera = instance->getCamera();
 	if (glfwGetKey(window, GLFW_KEY_O) == GLFW_PRESS)//O - camera submarinului
 	{
-		if (std::shared_ptr<SideviewCamera> currentCamera = std::dynamic_pointer_cast<SideviewCamera>(camera))
-		{
-			instance->setCamera( instance->getSubmarineCamera());
-		}
+		instance->setCamera( instance->getSubmarineCamera());
 	}
 
 	if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS)//P- side view camera
 	{
-		if (std::shared_ptr<SubmarineCamera> currentCamera = std::dynamic_pointer_cast<SubmarineCamera>(camera))
-		{
-			instance->setCamera(instance->getSideCamera());
-		}
+		instance->setCamera(instance->getSideCamera());
 	}
 
 	if (std::shared_ptr<SubmarineCamera> currentCamera = std::dynamic_pointer_cast<SubmarineCamera>(camera))
@@ -201,10 +181,11 @@ void RunProgram::initializePaths()
 	std::wstring_convert<std::codecvt_utf8<wchar_t>> converter;
 	m_currentPath = converter.to_bytes(wscurrentPath);
 
-	m_submarineShader= std::make_shared<Shader>((m_currentPath + "\\Shaders\\PhongLightWithTexture.vs").c_str(), (m_currentPath + "\\Shaders\\PhongLightWithTexture.fs").c_str());
-	m_lightSourceShader = std::make_shared<Shader>((m_currentPath + "\\Shaders\\PhongLightWithTexture.vs").c_str(), (m_currentPath + "\\Shaders\\PhongLightWithTexture.fs").c_str());
+	m_submarineShader= std::make_unique<Shader>((m_currentPath + "\\Shaders\\PhongLightWithTexture.vs").c_str(), (m_currentPath + "\\Shaders\\PhongLightWithTexture.fs").c_str());
+	m_lightSourceShader = std::make_unique<Shader>((m_currentPath + "\\Shaders\\PhongLightWithTexture.vs").c_str(), (m_currentPath + "\\Shaders\\PhongLightWithTexture.fs").c_str());
 
-	waterShader= std::make_shared<Shader>((m_currentPath + "\\Shaders\\Water.vs").c_str(), (m_currentPath + "\\Shaders\\Water.fs").c_str());;
+	m_waterShader = std::make_unique<Shader>((m_currentPath + "\\Shaders\\Water.vs").c_str(), (m_currentPath + "\\Shaders\\Water.fs").c_str());
+
 }
 
 void RunProgram::createWater()
@@ -221,7 +202,7 @@ void RunProgram::createWater()
 void RunProgram::createSubmarine()
 {
 	std::string submarineFileName = (m_currentPath + "\\Models\\Submarin\\submarin.obj");
-	m_submarine = std::make_shared<Submarine>(submarineFileName, m_submarineShader);
+	m_submarine = std::make_shared<Submarine>(submarineFileName);
 }
 
 void RunProgram::createLightSource()

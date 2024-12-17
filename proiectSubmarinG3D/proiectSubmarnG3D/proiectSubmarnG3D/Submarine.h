@@ -17,20 +17,20 @@
 class Submarine
 {
 public:
-	Submarine(std::string fileName,std::shared_ptr<Shader> shader);
+	Submarine(std::string fileName);
 	Submarine(const Submarine& other);
 	Submarine& operator=(const Submarine& other);
 	Submarine(Submarine&& other) noexcept;
 	Submarine& operator=(Submarine&& other) noexcept;
 
-	void updateSubmarine(Dir dir, double dt);
+	void updateSubmarine(Dir dir, double dt,Shader& shader);
 	glm::mat4 getModel();
 	glm::vec3 getPosition();
 	glm::vec3 getForwardDirection();
 	float getYaw();
 	float getPitch();
 
-	void draw();
+	void draw(Shader& shader);
 
 private:
 	glm::mat4 submarineModel;
@@ -42,7 +42,6 @@ private:
 	float roll;
 	float movementSpeed;
 	Model m_model;
-	std::shared_ptr<Shader> m_shader;
 
 	void updateForwardDirection();
 	void updateSubmarineDirection();

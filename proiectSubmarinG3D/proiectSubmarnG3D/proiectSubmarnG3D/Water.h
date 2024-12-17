@@ -22,6 +22,6 @@ public:
     Water(const glm::vec3& position, const glm::vec3& scale, const char* texturePath, const char* sandTexturePath);
     ~Water();
 
-    void draw(std::shared_ptr<Shader> shader);
+    void draw(Shader& shader);
 };
 

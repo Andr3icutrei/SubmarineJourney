@@ -16,13 +16,13 @@ private:
 	glm::vec3 m_scale;
 	glm::vec3 m_lightColor;
 public:
-	LightSource(std::string& fileName, std::shared_ptr<Shader>& Shader,glm::vec3 scale);
+	LightSource(std::string& fileName, std::unique_ptr<Shader>& Shader,glm::vec3 scale);
 
-	void rotate(double deltaTime, std::shared_ptr<Shader>& Shader, const glm::mat4& viewMatrix);
+	void rotate(double deltaTime, std::unique_ptr<Shader>& Shader, const glm::mat4& viewMatrix);
 
-	void appear(std::shared_ptr<Shader>& Shader);
+	void appear(std::unique_ptr<Shader>& Shader);
 
-	void draw(std::shared_ptr<Shader>& shader);
+	void draw(std::unique_ptr<Shader>& shader);
 
 	void SetModelMatrix(glm::mat4 modelMatrix) override;
 

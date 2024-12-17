@@ -64,10 +64,10 @@ private:
     std::shared_ptr<Water> m_water;
     std::shared_ptr<LightSource> m_lightSource;
 
-    std::shared_ptr<Shader> m_submarineShader;
-    std::shared_ptr<Shader> m_lightSourceShader;
+    std::unique_ptr<Shader> m_submarineShader;
+    std::unique_ptr<Shader> m_lightSourceShader;
 
-    std::shared_ptr < Shader> waterShader;
+    std::unique_ptr<Shader> m_waterShader;
 
     double deltaTime = 0.0f;
     double lastFrame = 0.0f;
@@ -103,6 +103,8 @@ public:
     double getDeltaTime() const { return deltaTime; }
     double getLastFrame() const { return lastFrame; }
 
+    Shader& getSubmarineShader() { return *m_submarineShader; }
+
     // Setters
     void setProjMatrixLocation(GLuint value) { ProjMatrixLocation = value; }
     void setViewMatrixLocation(GLuint value) { ViewMatrixLocation = value; }
@@ -115,6 +117,7 @@ public:
 
     void setDeltaTime(double time) { deltaTime = time; }
     void setLastFrame(double time) { lastFrame = time; }
+
 };
 
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);

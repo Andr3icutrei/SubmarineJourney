@@ -4,7 +4,7 @@ SideviewCamera::SideviewCamera(glm::vec3 pos, glm::vec3 target, glm::vec3 worldU
 	m_position{pos},
 	m_target{target},
 	m_worldUp{worldUp},
-	m_fov{60.0f},
+	m_fov{ 75.0f },
 	m_nearPlane{0.1f},
 	m_farPlane{100.f},
 	m_aspectRatio{(float)width/(float)height}

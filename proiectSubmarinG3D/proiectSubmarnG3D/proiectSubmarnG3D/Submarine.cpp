@@ -1,6 +1,6 @@
 #include "Submarine.h"
 
-Submarine::Submarine(std::string fileName, std::shared_ptr<Shader> shader)
+Submarine::Submarine(std::string fileName)
 	: submarineModel(1.0f),
 	yaw(-90.0f),
 	pitch(0.0f),
@@ -8,8 +8,7 @@ Submarine::Submarine(std::string fileName, std::shared_ptr<Shader> shader)
 	movementSpeed(20.0f),
 	submarineScale(0.2f),
 	submarinePosition(0.0f),
-	m_model(fileName,false),
-	m_shader(std::move(shader))// here is the error
+	m_model(fileName,false)
 {
 
 	updateForwardDirection();
@@ -82,7 +81,7 @@ Submarine& Submarine::operator=(Submarine&& other) noexcept
 	return *this;
 }
 
-void Submarine::updateSubmarine(Dir dir, double dt)
+void Submarine::updateSubmarine(Dir dir, double dt,Shader& shader)
 {
 	float velocity = (float)dt * movementSpeed;
 
@@ -152,8 +151,7 @@ void Submarine::updateSubmarine(Dir dir, double dt)
 	updateForwardDirection();
 
 	updateSubmarineDirection();
-
-	m_model.Draw(m_shader);
+	draw(shader);
 }
 
 glm::mat4 Submarine::getModel()
@@ -181,9 +179,10 @@ float Submarine::getPitch()
 	return pitch;
 }
 
-void Submarine::draw()
+void Submarine::draw(Shader& shader)
 {
-	m_model.Draw(m_shader);
+	shader.setInt("texture_diffuse1", 0);
+	m_model.Draw(shader);
 }
 
 void Submarine::updateForwardDirection()

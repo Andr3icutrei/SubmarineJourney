@@ -52,13 +52,15 @@ void RunProgram::render()
 
 		glDepthMask(GL_FALSE);
 
-		glm::mat4 scaleMatrix = glm::scale(glm::mat4(1.0f), glm::vec3(25.0f));
+		glm::mat4 scaleMatrix = glm::scale(glm::mat4(1.0f), glm::vec3(35.0f, 15.0f, 35.0f)); // Scale with a smaller value for Y
+		glm::mat4 translateMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 7.0f, 0.0f));
+		glm::mat4 modelMatrix = translateMatrix * scaleMatrix;
 		m_skyboxShader->use();
 		m_skyboxShader->SetVec3("lightColor", m_lightSource->getLightColor());
 		m_skyboxShader->SetVec3("lightDir", lightDir);
 		m_skyboxShader->setMat4("view", m_camera->getViewMatrix());
 		m_skyboxShader->setMat4("projection",m_camera->getProjectionMatrix());
-		m_skyboxShader->setMat4("model", scaleMatrix);
+		m_skyboxShader->setMat4("model", modelMatrix);
 		m_skybox->draw(*m_skyboxShader);
 
 		glDisable(GL_BLEND);
@@ -215,7 +217,7 @@ void RunProgram::createWater()
 	std::string strSandJpgPath = m_currentPath + "\\x64\\Debug\\sand.jpg";
 	const char* sandPath{ strSandJpgPath.c_str() };
 
-	m_water = std::make_shared<Water>(glm::vec3(0.0f, -4.0f, 3.0f), glm::vec3(70.0f, 8.0f, 70.0f), waterPath, sandPath);
+	m_water = std::make_shared<Water>(glm::vec3(0.0f, -4.0f, 3.0f), glm::vec3(80.0f, 8.0f, 80.0f), waterPath, sandPath);
 }
 
 void RunProgram::createSubmarine()
@@ -235,7 +237,7 @@ void RunProgram::createLightSource()
 	glm::vec3 lightSourceScale=glm::vec3(1.0f);
 	glm::vec3 lightColor;
 	std::string mtlPath;
-	if (!(hour >= 6 && hour <= 18))
+	if (hour >= 6 && hour <= 18)
 	{
 		lightColor = (glm::vec3(1.0f, 0.95f, 1.f));//sun light color
 		lightSourcePath += "\\Models\\Sun\\sun.obj";
@@ -249,7 +251,7 @@ void RunProgram::createLightSource()
 	}
 
 	m_lightSource=std::make_shared<LightSource>(lightSourcePath,m_lightSourceShader, lightSourceScale);
-	m_lightSource->setPosition(glm::vec3(-3.0f, 3.0f, -8.0f));
+	m_lightSource->setPosition(glm::vec3(-3.0f, 4.0f, -8.0f));
 	m_lightSource->setLightColor(lightColor);
 }
 

@@ -91,6 +91,8 @@ void RunProgram::render()
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glDepthMask(GL_FALSE);
 		m_waterShader->use();
+		m_waterShader->SetVec3("lightDir", lightDir);
+		m_waterShader->setFloat("time", glfwGetTime());
 		m_waterShader->SetVec3("lightColor", m_lightSource->getLightColor());
 		m_waterShader->setMat4("view", m_camera->getViewMatrix());
 		m_waterShader->setMat4("projection", m_camera->getProjectionMatrix());

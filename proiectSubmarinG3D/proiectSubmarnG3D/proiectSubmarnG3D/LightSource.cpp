@@ -38,6 +38,16 @@ void LightSource::draw(std::unique_ptr<Shader>& Shader)
 	m_model.Draw(*Shader);
 }
 
+glm::vec3 LightSource::getColor() const
+{
+    return m_objectColor;
+}
+
+void LightSource::setColor(glm::vec3 color)
+{
+    m_objectColor = color;
+}
+
 LightSource::LightSource(std::string& fileName, std::unique_ptr<Shader>& Shader,glm::vec3 scale) :
 	m_path{fileName} ,
 	m_model{fileName,false},

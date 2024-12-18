@@ -2,6 +2,7 @@
 #include <glm.hpp>
 #include "stb_image.h"
 #include "Model.h"
+#include "LightSource.h"    
 
 class Skybox
 {

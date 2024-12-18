@@ -3,42 +3,42 @@
 void Skybox::setupSkybox()
 {
     float skyboxVertices[] = {
-        // Positions            // Texture Coords
+        // Positions            // Texture Coords // Normals
         // Back face
-        -1.0f,  1.0f, -1.0f,   0.0f, 1.0f,  // 0
-        -1.0f, -1.0f, -1.0f,   0.0f, 0.0f,  // 1
-         1.0f, -1.0f, -1.0f,   1.0f, 0.0f,  // 2
-         1.0f,  1.0f, -1.0f,   1.0f, 1.0f,  // 3
+        -1.0f,  1.0f, -1.0f,   0.0f, 1.0f,       0.0f,  0.0f, -1.0f,  // 0
+        -1.0f, -1.0f, -1.0f,   0.0f, 0.0f,       0.0f,  0.0f, -1.0f,  // 1
+         1.0f, -1.0f, -1.0f,   1.0f, 0.0f,       0.0f,  0.0f, -1.0f,  // 2
+         1.0f,  1.0f, -1.0f,   1.0f, 1.0f,       0.0f,  0.0f, -1.0f,  // 3
 
          // Front face
-         -1.0f,  1.0f,  1.0f,   0.0f, 1.0f,  // 4
-         -1.0f, -1.0f,  1.0f,   0.0f, 0.0f,  // 5
-          1.0f, -1.0f,  1.0f,   1.0f, 0.0f,  // 6
-          1.0f,  1.0f,  1.0f,   1.0f, 1.0f,  // 7
+         -1.0f,  1.0f,  1.0f,   0.0f, 1.0f,       0.0f,  0.0f,  1.0f,  // 4
+         -1.0f, -1.0f,  1.0f,   0.0f, 0.0f,       0.0f,  0.0f,  1.0f,  // 5
+          1.0f, -1.0f,  1.0f,   1.0f, 0.0f,       0.0f,  0.0f,  1.0f,  // 6
+          1.0f,  1.0f,  1.0f,   1.0f, 1.0f,       0.0f,  0.0f,  1.0f,  // 7
 
           // Left face
-          -1.0f,  1.0f,  1.0f,   0.0f, 1.0f,  // 8
-          -1.0f, -1.0f,  1.0f,   0.0f, 0.0f,  // 9
-          -1.0f, -1.0f, -1.0f,   1.0f, 0.0f,  // 10
-          -1.0f,  1.0f, -1.0f,   1.0f, 1.0f,  // 11
+          -1.0f,  1.0f,  1.0f,   0.0f, 1.0f,      -1.0f,  0.0f,  0.0f,  // 8
+          -1.0f, -1.0f,  1.0f,   0.0f, 0.0f,      -1.0f,  0.0f,  0.0f,  // 9
+          -1.0f, -1.0f, -1.0f,   1.0f, 0.0f,      -1.0f,  0.0f,  0.0f,  // 10
+          -1.0f,  1.0f, -1.0f,   1.0f, 1.0f,      -1.0f,  0.0f,  0.0f,  // 11
 
           // Right face
-           1.0f,  1.0f,  1.0f,   0.0f, 1.0f,  // 12
-           1.0f, -1.0f,  1.0f,   0.0f, 0.0f,  // 13
-           1.0f, -1.0f, -1.0f,   1.0f, 0.0f,  // 14
-           1.0f,  1.0f, -1.0f,   1.0f, 1.0f,  // 15
+           1.0f,  1.0f,  1.0f,   0.0f, 1.0f,       1.0f,  0.0f,  0.0f,  // 12
+           1.0f, -1.0f,  1.0f,   0.0f, 0.0f,       1.0f,  0.0f,  0.0f,  // 13
+           1.0f, -1.0f, -1.0f,   1.0f, 0.0f,       1.0f,  0.0f,  0.0f,  // 14
+           1.0f,  1.0f, -1.0f,   1.0f, 1.0f,       1.0f,  0.0f,  0.0f,  // 15
 
            // Top face
-           -1.0f,  1.0f,  1.0f,   0.0f, 1.0f,  // 16
-           -1.0f,  1.0f, -1.0f,   0.0f, 0.0f,  // 17
-            1.0f,  1.0f, -1.0f,   1.0f, 0.0f,  // 18
-            1.0f,  1.0f,  1.0f,   1.0f, 1.0f,  // 19
+           -1.0f,  1.0f,  1.0f,   0.0f, 1.0f,       0.0f,  1.0f,  0.0f,  // 16
+           -1.0f,  1.0f, -1.0f,   0.0f, 0.0f,       0.0f,  1.0f,  0.0f,  // 17
+            1.0f,  1.0f, -1.0f,   1.0f, 0.0f,       0.0f,  1.0f,  0.0f,  // 18
+            1.0f,  1.0f,  1.0f,   1.0f, 1.0f,       0.0f,  1.0f,  0.0f,  // 19
 
             // Bottom face
-            -1.0f, -1.0f,  1.0f,   0.0f, 1.0f,  // 20
-            -1.0f, -1.0f, -1.0f,   0.0f, 0.0f,  // 21
-             1.0f, -1.0f, -1.0f,   1.0f, 0.0f,  // 22
-             1.0f, -1.0f,  1.0f,   1.0f, 1.0f,  // 23
+            -1.0f, -1.0f,  1.0f,   0.0f, 1.0f,       0.0f, -1.0f,  0.0f,  // 20
+            -1.0f, -1.0f, -1.0f,   0.0f, 0.0f,       0.0f, -1.0f,  0.0f,  // 21
+             1.0f, -1.0f, -1.0f,   1.0f, 0.0f,       0.0f, -1.0f,  0.0f,  // 22
+             1.0f, -1.0f,  1.0f,   1.0f, 1.0f,       0.0f, -1.0f,  0.0f,  // 23
     };
 
 
@@ -69,14 +69,18 @@ void Skybox::setupSkybox()
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(skyboxIndices), skyboxIndices, GL_STATIC_DRAW);
 
-    // Define vertex attributes
     // Position attribute (3 floats)
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
 
     // Texture coordinates attribute (2 floats)
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
     glEnableVertexAttribArray(1);
+
+    // Normal attribute (3 floats)
+    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(5 * sizeof(float)));
+    glEnableVertexAttribArray(2);
+
 
     glBindVertexArray(0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);

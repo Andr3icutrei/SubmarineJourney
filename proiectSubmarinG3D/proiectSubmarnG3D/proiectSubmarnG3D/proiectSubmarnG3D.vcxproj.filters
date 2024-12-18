@@ -37,7 +37,9 @@
     <ClCompile Include="RunProgram.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Skybox.cpp" />
+    <ClCompile Include="Skybox.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="SubmarineCamera.h">
@@ -79,7 +81,9 @@
     <ClInclude Include="RunProgram.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Skybox.h" />
+    <ClInclude Include="Skybox.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -95,10 +99,10 @@
     <None Include="..\Shaders\PhongLight.vs">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="..\Shaders\PhongLightWithTexture.fs">
+    <None Include="..\Shaders\LightSource.fs">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="..\Shaders\PhongLightWithTexture.vs">
+    <None Include="..\Shaders\LightSource.vs">
       <Filter>Shaders</Filter>
     </None>
     <None Include="..\Shaders\Water.fs">
@@ -111,6 +115,12 @@
       <Filter>Shaders</Filter>
     </None>
     <None Include="..\Shaders\Skybox.vs">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\Shaders\Object.fs">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\Shaders\Object.vs">
       <Filter>Shaders</Filter>
     </None>
   </ItemGroup>

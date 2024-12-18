@@ -5,7 +5,7 @@ Submarine::Submarine(std::string fileName)
 	yaw(-90.0f),
 	pitch(0.0f),
 	roll(0.0f),
-	movementSpeed(20.0f),
+	movementSpeed(150.0f),
 	submarineScale(0.2f),
 	submarinePosition(0.0f),
 	m_model(fileName,false)
@@ -181,7 +181,6 @@ float Submarine::getPitch()
 
 void Submarine::draw(Shader& shader)
 {
-	shader.setInt("texture_diffuse1", 0);
 	m_model.Draw(shader);
 }
 

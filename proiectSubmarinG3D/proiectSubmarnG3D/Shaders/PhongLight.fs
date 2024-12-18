@@ -12,14 +12,14 @@ uniform vec3 objectColor;
 void main()
 {
 	// simple color blending
-    //FragColor = vec4(lightColor * objectColor, 1.0);
+    FragColor = vec4(lightColor * objectColor, 1.0);
 	
 	// ambient
-    float ambientStrength = 0.1;
+    float ambientStrength = 0.5;
     vec3 ambient = ambientStrength * lightColor;
   	
     // diffuse
-	float diffuseStrength = 0.5;
+	float diffuseStrength = 0.2;
     vec3 norm = normalize(Normal);
     vec3 lightDir = normalize(lightPos - FragPos);
     float diff = max(dot(norm, lightDir), 0.0);

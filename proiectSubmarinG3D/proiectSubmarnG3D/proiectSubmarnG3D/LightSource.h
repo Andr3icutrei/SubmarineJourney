@@ -3,6 +3,8 @@
 #include "glm.hpp"
 #include "Shader.h"
 #include "IObject.h"
+#include <fstream>
+#include <sstream>
 
 class LightSource : public IObject
 {
@@ -15,14 +17,19 @@ private:
 	glm::vec3 m_position;
 	glm::vec3 m_scale;
 	glm::vec3 m_lightColor;
+	glm::vec3 m_objectColor;
 public:
-	LightSource(std::string& fileName, std::unique_ptr<Shader>& Shader,glm::vec3 scale);
+	LightSource(std::string& fileName ,std::unique_ptr<Shader>& Shader,glm::vec3 scale);
 
 	void rotate(double deltaTime, std::unique_ptr<Shader>& Shader, const glm::mat4& viewMatrix);
 
 	void appear(std::unique_ptr<Shader>& Shader);
 
 	void draw(std::unique_ptr<Shader>& shader);
+
+	glm::vec3 getColor() const;
+
+	void setColor(glm::vec3 color);
 
 	void SetModelMatrix(glm::mat4 modelMatrix) override;
 
@@ -61,5 +68,7 @@ public:
 	glm::vec3 getLightColor() const { return m_lightColor; }
 
 	void setLightColor(const glm::vec3& lightColor) { m_lightColor = lightColor; }
+
+	
 };
 

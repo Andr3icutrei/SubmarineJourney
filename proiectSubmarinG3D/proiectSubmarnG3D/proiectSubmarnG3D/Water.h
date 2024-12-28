@@ -22,6 +22,9 @@ public:
     Water(const glm::vec3& position, const glm::vec3& scale, const char* texturePath, const char* sandTexturePath);
     ~Water();
 
+    glm::vec3 getPosition();
+    glm::vec3 getScale();
+
     void draw(Shader& shader);
 };
 

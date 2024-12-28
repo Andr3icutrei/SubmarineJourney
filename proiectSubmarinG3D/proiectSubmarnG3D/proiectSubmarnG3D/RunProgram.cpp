@@ -122,32 +122,38 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 	RunProgram* instance = RunProgram::getInstance();
 	float deltaTime = instance->getDeltaTime();
 	std::shared_ptr<Submarine> submarine = instance->getSubmarine();
+	std::shared_ptr<Water> water = instance->getWater();
+
+	bool surface = false;
+
+	if (submarine->getPosition().y >= 0.0f)
+		surface = true;
 
 	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-		RunProgram::getInstance()->getSubmarine()->updateSubmarine(Dir::LEFT, deltaTime, RunProgram::getInstance()->getSubmarineShader());
+		RunProgram::getInstance()->getSubmarine()->updateSubmarine(Dir::LEFT, deltaTime, RunProgram::getInstance()->getSubmarineShader(), surface);
 
 	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-		submarine->updateSubmarine(Dir::RIGHT, deltaTime, RunProgram::getInstance()->getSubmarineShader());
+		submarine->updateSubmarine(Dir::RIGHT, deltaTime, RunProgram::getInstance()->getSubmarineShader(), surface);
 
 	if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
-		submarine->updateSubmarine(Dir::UP, deltaTime, RunProgram::getInstance()->getSubmarineShader());
+		submarine->updateSubmarine(Dir::UP, deltaTime, RunProgram::getInstance()->getSubmarineShader(), surface);
 
-	if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
-		submarine->updateSubmarine(Dir::DOWN, deltaTime, RunProgram::getInstance()->getSubmarineShader());
+	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+		submarine->updateSubmarine(Dir::DOWN, deltaTime, RunProgram::getInstance()->getSubmarineShader(), surface);
 
 	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-		submarine->updateSubmarine(Dir::FORWARD, deltaTime, RunProgram::getInstance()->getSubmarineShader());
+		submarine->updateSubmarine(Dir::FORWARD, deltaTime, RunProgram::getInstance()->getSubmarineShader(), surface);
 
 	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
 		glfwSetWindowShouldClose(window, true);
 
 	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS &&
 		glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-		submarine->updateSubmarine(Dir::FORWARD_LEFT, deltaTime, RunProgram::getInstance()->getSubmarineShader());
+		submarine->updateSubmarine(Dir::FORWARD_LEFT, deltaTime, RunProgram::getInstance()->getSubmarineShader(), surface);
 
 	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS &&
 		glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-		submarine->updateSubmarine(Dir::FORWARD_RIGHT, deltaTime, RunProgram::getInstance()->getSubmarineShader());
+		submarine->updateSubmarine(Dir::FORWARD_RIGHT, deltaTime, RunProgram::getInstance()->getSubmarineShader(), surface);
 
 	std::shared_ptr<ICamera> camera = instance->getCamera();
 	if (glfwGetKey(window, GLFW_KEY_O) == GLFW_PRESS)//O - camera submarinului

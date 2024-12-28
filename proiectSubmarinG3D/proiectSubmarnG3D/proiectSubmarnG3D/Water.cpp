@@ -144,6 +144,16 @@ Water::~Water() {
     glDeleteTextures(1, &sandTextureID);
 }
 
+glm::vec3 Water::getPosition()
+{
+    return position;
+}
+
+glm::vec3 Water::getScale()
+{
+    return scale;
+}
+
 void Water::draw(Shader& shader)
 {
     shader.use();

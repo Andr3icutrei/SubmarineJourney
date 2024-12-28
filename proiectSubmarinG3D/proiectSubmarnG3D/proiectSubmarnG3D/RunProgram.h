@@ -101,6 +101,7 @@ public:
     std::shared_ptr<SubmarineCamera> getSubmarineCamera() { return m_submarineCamera; }
     std::shared_ptr<SideviewCamera> getSideCamera() { return m_sideCamera; }
     std::shared_ptr<ICamera> getCamera() const { return m_camera; }
+    std::shared_ptr<Water> getWater() { return m_water; }
 
     double getDeltaTime() const { return deltaTime; }
     double getLastFrame() const { return lastFrame; }

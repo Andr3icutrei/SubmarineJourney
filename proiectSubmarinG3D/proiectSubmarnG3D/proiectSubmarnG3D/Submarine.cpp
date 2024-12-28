@@ -81,7 +81,7 @@ Submarine& Submarine::operator=(Submarine&& other) noexcept
 	return *this;
 }
 
-void Submarine::updateSubmarine(Dir dir, double dt,Shader& shader)
+void Submarine::updateSubmarine(Dir dir, double dt, Shader& shader, bool surface)
 {
 	float velocity = (float)dt * movementSpeed;
 
@@ -148,7 +148,10 @@ void Submarine::updateSubmarine(Dir dir, double dt,Shader& shader)
 	}
 	}
 
-	updateForwardDirection();
+	if (surface && pitch >= 0.0f)
+		updateForwardDirectionSurface();
+	else 
+		updateForwardDirection();
 
 	updateSubmarineDirection();
 	draw(shader);
@@ -191,6 +194,17 @@ void Submarine::updateForwardDirection()
 	direction.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
 	direction.y = sin(glm::radians(pitch));
 	direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+
+	forwardDirection = glm::normalize(direction);
+}
+
+void Submarine::updateForwardDirectionSurface()
+{
+	glm::vec3 direction;
+
+	direction.x = cos(glm::radians(yaw)) * cos(glm::radians(0.0f));
+	direction.y = sin(glm::radians(0.0f));
+	direction.z = sin(glm::radians(yaw)) * cos(glm::radians(0.0f));
 
 	forwardDirection = glm::normalize(direction);
 }

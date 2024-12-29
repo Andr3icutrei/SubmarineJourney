@@ -16,7 +16,8 @@ private:
 	float m_speed;
 	float m_limitX, m_limitZ;
 	float m_angle;
-
+	bool m_reverse;
+	glm::vec3 m_rotatedDirection;
 public:
 	Fish(const std::string& modelPath, glm::vec3 startPosition, glm::vec3 scale, float speed, float limitX, float limitZ);
 	void update(float deltaTime);

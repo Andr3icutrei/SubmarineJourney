@@ -93,18 +93,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
-    <None Include="..\Shaders\Lamp.fs">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\Shaders\Lamp.vs">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\Shaders\PhongLight.fs">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\Shaders\PhongLight.vs">
-      <Filter>Shaders</Filter>
-    </None>
     <None Include="..\Shaders\LightSource.fs">
       <Filter>Shaders</Filter>
     </None>

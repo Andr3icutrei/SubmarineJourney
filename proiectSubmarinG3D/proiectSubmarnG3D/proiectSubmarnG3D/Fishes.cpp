@@ -14,44 +14,66 @@ Fish::Fish(const std::string& modelPath, glm::vec3 startPosition, glm::vec3 scal
 
 void Fish::update(float deltaTime)
 {
-	// Update the angle based on the speed and deltaTime.
-	m_angle += m_speed * deltaTime;
-	if (m_angle > 360.0f)
-		m_angle -= 360.0f;
+    // Update the angle of movement along the ellipse
+    m_angle += m_speed * deltaTime;
+    if (m_angle > 360.0f)
+        m_angle -= 360.0f;
 
-	// Update the position in an elliptical motion on X and Z axes
-	m_position.x = m_limitX * cos(glm::radians(m_angle));
-	m_position.z = m_limitZ * sin(glm::radians(m_angle));
+    // Update position along the ellipse
+    m_position.x = m_limitX * cos(glm::radians(m_angle));
+    m_position.z = m_limitZ * sin(glm::radians(m_angle));
 
-	// Update the direction based on the angle
-	m_direction.x = -sin(glm::radians(m_angle)); // Direction along X
-	m_direction.z = cos(glm::radians(m_angle));  // Direction along Z
-	m_direction = glm::normalize(m_direction);   // Normalize the direction vector
+    // Direction vector pointing along the tangent to the ellipse (facing the trajectory)
+    m_direction.x = -sin(glm::radians(m_angle));  // Direction along X (reversed)
+    m_direction.z = cos(glm::radians(m_angle));  // Direction along Z (reversed)
+    m_direction = glm::normalize(m_direction);    // Normalize the direction vector
+
+    if (m_angle < 180.0f) {
+        // Reverse direction if passed halfway
+        m_direction = -m_direction;
+    }
+
+    // Rotate the direction vector by 90 degrees counterclockwise (or clockwise)
+    // Counterclockwise (left):
+    float rotatedX = m_direction.x;   // Swap and negate the x-component for counterclockwise
+    float rotatedZ = -m_direction.z;  // Swap and negate the z-component for counterclockwise
+
+    // Update the rotated direction
+    m_rotatedDirection = glm::vec3(rotatedX, 0.0f, rotatedZ);
 }
 
 void Fish::draw(std::unique_ptr<Shader>& Shader)
 {
-	// Calculate the angle for the fish's rotation
-	float angle = glm::atan(m_direction.z, m_direction.x); // Corrected angle calculation
+    // Get the angle of the rotated direction vector to determine fish's orientation
+    float angle = glm::atan(m_rotatedDirection.z, m_rotatedDirection.x);  // Get the angle of the rotated direction
 
-	// Create transformation matrix
-	glm::mat4 m_mat = glm::mat4(1.0f);
-	m_mat = glm::translate(m_mat, m_position);  // Apply translation
-	m_mat = glm::rotate(m_mat, angle, glm::vec3(0.0f, 1.0f, 0.0f));  // Apply rotation (yaw)
-	m_mat = glm::scale(m_mat, m_scale);  // Apply scaling
+    glm::mat4 m_mat = glm::mat4(1.0f);
+    m_mat = glm::translate(m_mat, m_position);    
+    
+    float rightAngle;
+    if (m_angle < 180.f)
+        rightAngle = -90.f;
+    else
+        rightAngle = 90.f;
 
-	// Set the shader and draw the model
-	Shader->use();
-	Shader->setMat4("model", m_mat);  // Set the model matrix
-	m_model.Draw(*Shader);  // Render the model
+    // Apply the rotation to the fish model (rotate by the calculated angle)
+    m_mat = glm::rotate(m_mat, angle, glm::vec3(0.0f, 1.0f, 0.0f));  // Rotate around Y-axis
+
+    // Scale the model
+    m_mat = glm::scale(m_mat, m_scale);
+
+    // Pass the final model matrix to the shader
+    Shader->use();
+    Shader->setMat4("model", m_mat);
+    m_model.Draw(*Shader);
 }
 
 glm::vec3 Fish::getPosition()
 {
-	return m_position;  // Return the current position of the fish
+	return m_position;  
 }
 
 void Fish::setPosition(const glm::vec3& position)
 {
-	m_position = position;  // Set a new position for the fish
+	m_position = position;  
 }

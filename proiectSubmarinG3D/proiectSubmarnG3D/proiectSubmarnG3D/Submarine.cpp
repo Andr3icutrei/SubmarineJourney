@@ -128,24 +128,6 @@ void Submarine::updateSubmarine(Dir dir, double dt, Shader& shader, bool surface
 
 		break;
 	}
-	case FORWARD_LEFT: {
-		roll += 1.0f;
-
-		if (roll >= 20.0f)
-			roll = 20.0f;
-
-		submarinePosition += forwardDirection * velocity;
-		break;
-	}
-	case FORWARD_RIGHT: {
-		roll -= 1.0f;
-
-		if (roll <= -20.0f)
-			roll = -20.0f;
-
-		submarinePosition += forwardDirection * velocity;
-		break;
-	}
 	}
 
 	if (surface && pitch >= 0.0f)
@@ -224,8 +206,7 @@ void Submarine::updateSubmarineDirection()
 
 void Submarine::sideTilt(Dir dir)
 {
-	if (dir != Dir::LEFT && dir != Dir::FORWARD_LEFT &&
-		dir != Dir::RIGHT && dir != Dir::FORWARD_RIGHT && roll != 0.0f)
+	if (dir != Dir::LEFT && dir != Dir::RIGHT && roll != 0.0f)
 	{
 		float tilt;
 		if (roll < 0.0f)

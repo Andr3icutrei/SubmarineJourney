@@ -147,14 +147,6 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
 		glfwSetWindowShouldClose(window, true);
 
-	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS &&
-		glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-		submarine->updateSubmarine(Dir::FORWARD_LEFT, deltaTime, RunProgram::getInstance()->getSubmarineShader(), surface);
-
-	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS &&
-		glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-		submarine->updateSubmarine(Dir::FORWARD_RIGHT, deltaTime, RunProgram::getInstance()->getSubmarineShader(), surface);
-
 	std::shared_ptr<ICamera> camera = instance->getCamera();
 	if (glfwGetKey(window, GLFW_KEY_O) == GLFW_PRESS)//O - camera submarinului
 	{

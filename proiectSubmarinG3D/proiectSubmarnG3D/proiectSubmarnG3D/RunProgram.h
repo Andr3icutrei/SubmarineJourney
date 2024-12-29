@@ -42,9 +42,8 @@ private:
     RunProgram(const RunProgram&) = delete;
     RunProgram& operator=(const RunProgram&) = delete;
 
-
-    const unsigned int m_SCR_WIDTH=1200;
-    const unsigned int m_SCR_HEIGHT=800;
+    const unsigned int m_SCR_WIDTH = 1200;
+    const unsigned int m_SCR_HEIGHT = 800;
 
     GLFWwindow* window;
 

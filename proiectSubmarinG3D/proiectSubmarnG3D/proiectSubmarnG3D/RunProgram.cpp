@@ -1,4 +1,4 @@
-#include "RunProgram.h"
+﻿#include "RunProgram.h"
 
 RunProgram::RunProgram() {
 }
@@ -19,6 +19,7 @@ void RunProgram::run()
 	initializePaths();
 	createLightSource();
 	createSubmarine();
+	createFishes();
 	createWater();
 	createSkybox();
 	render();
@@ -87,6 +88,12 @@ void RunProgram::render()
 		m_submarineShader->setInt("texture_diffuse1", 0);
 		m_submarine->draw(*m_submarineShader);
 
+		for (auto& fish : m_fishes)
+		{
+			fish->update(deltaTime); 
+			fish->draw(m_lightSourceShader);
+		}
+
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glDepthMask(GL_FALSE);
@@ -122,30 +129,32 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 	RunProgram* instance = RunProgram::getInstance();
 	float deltaTime = instance->getDeltaTime();
 	std::shared_ptr<Submarine> submarine = instance->getSubmarine();
-	std::shared_ptr<Water> water = instance->getWater();
-
-	bool surface = false;
-
-	if (submarine->getPosition().y >= 0.0f)
-		surface = true;
 
 	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-		RunProgram::getInstance()->getSubmarine()->updateSubmarine(Dir::LEFT, deltaTime, RunProgram::getInstance()->getSubmarineShader(), surface);
+		RunProgram::getInstance()->getSubmarine()->updateSubmarine(Dir::LEFT, deltaTime, RunProgram::getInstance()->getSubmarineShader());
 
 	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-		submarine->updateSubmarine(Dir::RIGHT, deltaTime, RunProgram::getInstance()->getSubmarineShader(), surface);
+		submarine->updateSubmarine(Dir::RIGHT, deltaTime, RunProgram::getInstance()->getSubmarineShader());
 
 	if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
-		submarine->updateSubmarine(Dir::UP, deltaTime, RunProgram::getInstance()->getSubmarineShader(), surface);
+		submarine->updateSubmarine(Dir::UP, deltaTime, RunProgram::getInstance()->getSubmarineShader());
 
-	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-		submarine->updateSubmarine(Dir::DOWN, deltaTime, RunProgram::getInstance()->getSubmarineShader(), surface);
+	if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
+		submarine->updateSubmarine(Dir::DOWN, deltaTime, RunProgram::getInstance()->getSubmarineShader());
 
 	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-		submarine->updateSubmarine(Dir::FORWARD, deltaTime, RunProgram::getInstance()->getSubmarineShader(), surface);
+		submarine->updateSubmarine(Dir::FORWARD, deltaTime, RunProgram::getInstance()->getSubmarineShader());
 
 	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
 		glfwSetWindowShouldClose(window, true);
+
+	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS &&
+		glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+		submarine->updateSubmarine(Dir::FORWARD_LEFT, deltaTime, RunProgram::getInstance()->getSubmarineShader());
+
+	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS &&
+		glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+		submarine->updateSubmarine(Dir::FORWARD_RIGHT, deltaTime, RunProgram::getInstance()->getSubmarineShader());
 
 	std::shared_ptr<ICamera> camera = instance->getCamera();
 	if (glfwGetKey(window, GLFW_KEY_O) == GLFW_PRESS)//O - camera submarinului
@@ -259,4 +268,23 @@ void RunProgram::createSkybox()
 {
 	std::string skyPath = m_currentPath + "\\x64\\Debug\\sky.jpg";
 	m_skybox = std::make_shared<Skybox>(skyPath.c_str());
+}
+
+void RunProgram::createFishes()
+{
+	std::string fishPath = m_currentPath + "\\Models\\Fish\\fish.obj";
+
+	const int FishCount = 3;
+	float linearFishSpeeds[FishCount] = { 5.5f, 6.0f, 6.5f };
+	float linearFishHeights[FishCount] = { -0.45f, -0.5f, -0.55f };
+	float movementLimitsX[FishCount] = { 3.0f, 4.0f, 5.0f }; // Radius on X axis (length of the ellipse)
+	float movementLimitsZ[FishCount] = { 2.0f, 3.0f, 4.0f }; //Radius on Y axis
+
+	for (int i = 0; i < FishCount; i++)
+	{
+		glm::vec3 startPosition(0.0f, linearFishHeights[i], 0.0f);
+		glm::vec3 scale(5.0f);
+
+		m_fishes.push_back(std::make_shared<Fish>(fishPath, startPosition, scale, linearFishSpeeds[i], movementLimitsX[i], movementLimitsZ[i]));
+	}
 }

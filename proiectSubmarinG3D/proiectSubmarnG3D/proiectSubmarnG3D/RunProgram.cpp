@@ -19,8 +19,8 @@ void RunProgram::run()
 	initializePaths();
 	createLightSource();
 	createSubmarine();
-	createFishes();
 	createWater();
+	createFishes();
 	createSkybox();
 	render();
 }
@@ -114,6 +114,18 @@ void RunProgram::render()
 
 	// glfw: terminate, clearing all previously allocated GLFW resources
 	glfwTerminate();
+}
+
+float RunProgram::generateRandom(float min, float max)
+{
+	std::random_device rd;
+	std::mt19937 gen(rd());
+
+	// Define a uniform distribution for integers
+	std::uniform_int_distribution<> uniformDist(min, max);
+
+	float rand = uniformDist(gen);
+	return rand;
 }
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
@@ -272,17 +284,34 @@ void RunProgram::createFishes()
 {
 	std::string fishPath = m_currentPath + "\\Models\\Fish\\fish.obj";
 
-	const int FishCount = 3;
-	float linearFishSpeeds[FishCount] = { 5.5f, 6.0f, 6.5f };
-	float linearFishHeights[FishCount] = { -0.45f, -0.5f, -0.55f };
-	float movementLimitsX[FishCount] = { 3.0f, 4.0f, 5.0f }; // Radius on X axis (length of the ellipse)
-	float movementLimitsZ[FishCount] = { 2.0f, 3.0f, 4.0f }; //Radius on Y axis
+	const int FishCount = 7;
+	std::vector<float> linearFishSpeeds(FishCount, 5.f);
+	std::vector<float> linearFishHeights(FishCount);
+	std::vector<float> movementLimitsX(FishCount); // Radius on X axis (ellipse)
+	std::vector<float> movementLimitsZ(FishCount); // Radius on Z axis (ellipse)
 
-	for (int i = 0; i < FishCount; i++)
+	const int waterSurface = m_water->getSurface(); // water max
+	const int waterBottom = m_water->getBottom(); // water min
+	float maxRadius = m_water->getDistanceFromCenter(); // max radius to spawn
+
+	for (int i = 0; i < FishCount; ++i)
 	{
-		glm::vec3 startPosition(0.0f, linearFishHeights[i], 0.0f);
-		glm::vec3 scale(5.0f);
+		linearFishHeights[i] = generateRandom(waterBottom, waterSurface); 
+		movementLimitsX[i] = generateRandom(1.0f, maxRadius);
+		movementLimitsZ[i] = generateRandom(1.0f, maxRadius); 
+	}
+
+	for (int i = 0; i < FishCount; ++i)
+	{
+		float randomX = generateRandom(-movementLimitsX[i], movementLimitsX[i]);
+		float randomZ = generateRandom(-movementLimitsZ[i], movementLimitsZ[i]);
+
+		std::cout << "Fish " << i << " position: X=" << randomX << ", Y=" << linearFishHeights[i] << ", Z=" << randomZ << '\n';
+
+		glm::vec3 startPosition(randomX, linearFishHeights[i], randomZ);
+		glm::vec3 scale(.0f);
 
 		m_fishes.push_back(std::make_shared<Fish>(fishPath, startPosition, scale, linearFishSpeeds[i], movementLimitsX[i], movementLimitsZ[i]));
 	}
 }
+

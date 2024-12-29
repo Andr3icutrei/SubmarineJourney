@@ -22,6 +22,7 @@
 #include <fstream>
 #include <sstream>
 #include <memory>
+#include <random>
 
 #include "Shader.h"
 #include "Model.h"
@@ -85,6 +86,8 @@ private:
     void createFishes();
     void initializeCameras();
     void render();
+
+    float generateRandom(float min, float max);
 public:
     // Static method to get the instance of the class
     static RunProgram* getInstance();

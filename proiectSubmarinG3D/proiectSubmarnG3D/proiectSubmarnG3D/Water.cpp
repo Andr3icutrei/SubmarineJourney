@@ -190,4 +190,19 @@ void Water::draw(Shader& shader)
     glBindVertexArray(0);
 }
 
+float Water::getSurface()
+{
+    return position.y;
+}
+
+float Water::getBottom()
+{
+    return position.y - scale.y;
+}
+
+float Water::getDistanceFromCenter()
+{
+    return scale.x / 2;
+}
+
 

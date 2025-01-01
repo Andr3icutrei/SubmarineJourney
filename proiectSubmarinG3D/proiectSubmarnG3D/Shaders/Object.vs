@@ -9,16 +9,21 @@ layout(location = 2) in vec2 aTexCoord; // Texture coordinates
 out vec2 TexCoord;
 out vec3 FragPos;  // Fragment position in world space
 out vec3 Normal;   // Normal in world space
+out vec4 FragPosLightSpace;  // Fragment position in light space
 
 // Uniforms for transformation matrices
 uniform mat4 model;
 uniform mat4 view;
 uniform mat4 projection;
+uniform mat4 lightSpaceMatrix;  // Matrix to transform positions to light space
 
 void main()
 {
     // Calculate fragment position in world space
     FragPos = vec3(model * vec4(aPos, 1.0));
+
+    // Calculate fragment position in light space
+    FragPosLightSpace = lightSpaceMatrix * vec4(FragPos, 1.0);
 
     // Pass normal in world space (account for model transformation)
     Normal = mat3(transpose(inverse(model))) * aNormal;

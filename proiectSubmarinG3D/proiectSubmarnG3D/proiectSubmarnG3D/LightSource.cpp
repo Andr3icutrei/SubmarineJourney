@@ -58,13 +58,3 @@ LightSource::LightSource(std::string& fileName, std::unique_ptr<Shader>& Shader,
 {
 	appear(Shader);
 }
-
-void LightSource::SetModelMatrix(glm::mat4 modelMatrix)
-{
-	m_mat = modelMatrix;
-}
-
-glm::mat4& LightSource::GetModelMatrix()
-{
-	return m_mat;
-}

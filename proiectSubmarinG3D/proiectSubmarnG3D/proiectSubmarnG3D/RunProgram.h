@@ -72,6 +72,11 @@ private:
     std::unique_ptr<Shader> m_lightSourceShader;
     std::unique_ptr<Shader> m_waterShader;
     std::unique_ptr<Shader> m_skyboxShader;
+    std::unique_ptr<Shader> m_shadowShader;
+
+    unsigned int m_shadowMap;
+
+    glm::mat4 m_lightSpaceMatrix;
 
     double deltaTime = 0.0f;
     double lastFrame = 0.0f;
@@ -88,6 +93,9 @@ private:
     void render();
 
     float generateRandom(float min, float max);
+
+    void generateShadowMap();
+    void generateShadowMapTexture();
 public:
     // Static method to get the instance of the class
     static RunProgram* getInstance();

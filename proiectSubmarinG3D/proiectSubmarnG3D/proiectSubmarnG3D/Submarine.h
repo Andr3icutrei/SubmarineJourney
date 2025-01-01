@@ -10,11 +10,12 @@
 #include "shader.h"
 #include "SubmarineCamera.h"
 #include "Model.h"
+#include "IObject.h"
 
 #include <memory>
 #include <string>
 
-class Submarine
+class Submarine : public IObject
 {
 public:
 	Submarine(std::string fileName);
@@ -31,6 +32,9 @@ public:
 	float getPitch();
 
 	void draw(Shader& shader);
+
+	void setModelMatrix(glm::mat4 modelMatrix) { submarineModel = modelMatrix; }
+	glm::mat4& getModelMatrix() { return submarineModel; }
 
 private:
 	glm::mat4 submarineModel;

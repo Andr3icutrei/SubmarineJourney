@@ -17,6 +17,7 @@ void RunProgram::run()
 	initializeGL();
 	initializeCameras();
 	initializePaths();
+	generateShadowMapTexture();
 	createLightSource();
 	createSubmarine();
 	createWater();
@@ -30,7 +31,7 @@ void RunProgram::initializeCameras()
 	m_submarinePosition = glm::vec3(0.0, 0.0, 3.0);
 	m_submarineCamera =std::make_shared<SubmarineCamera>(m_SCR_HEIGHT, m_SCR_WIDTH,m_submarinePosition);
 
-	m_sideCameraPosition = glm::vec3(7.0f, 3.0f, 0.0f);
+	m_sideCameraPosition = glm::vec3(9.0f, 3.0f, -2.0f);
 	m_sideCameraTarget = glm::vec3(0.0f, 0.0f, 0.0f);
 	m_sideCameraWorldUp = glm::vec3(0.0f, 1.0f, 0.0f);
 
@@ -47,6 +48,8 @@ void RunProgram::render()
 		double currentFrame = glfwGetTime();
 		deltaTime = currentFrame - lastFrame;
 		lastFrame = currentFrame;
+
+		generateShadowMap();
 
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -70,7 +73,7 @@ void RunProgram::render()
 
 		m_lightSourceShader->use();
 		m_lightSourceShader->setFloat("shininess", 0.8f);
-		m_lightSourceShader->setMat4("model", m_lightSource->GetModelMatrix());
+		m_lightSourceShader->setMat4("model", m_lightSource->getModelMatrix());
 		m_lightSourceShader->setMat4("view", m_camera->getViewMatrix());
 		m_lightSourceShader->setMat4("projection", m_camera->getProjectionMatrix());
 		m_lightSourceShader->SetVec3("lightColor", m_lightSource->getLightColor());
@@ -78,8 +81,10 @@ void RunProgram::render()
 		m_lightSource->rotate(deltaTime, m_lightSourceShader, m_camera->getViewMatrix());
 		m_lightSource->draw(m_lightSourceShader);
 
+		// Use the shadow map in the main rendering pass
+		glActiveTexture(GL_TEXTURE1);  // Use texture unit 1 for shadow map
+		glBindTexture(GL_TEXTURE_2D, m_shadowMap); // Bind the shadow map texture
 		m_submarineShader->use();
-		//glm::vec3 lightDir = glm::normalize( m_submarine->getPosition()- m_lightSource->getPosition());
 		m_submarineShader->SetVec3("lightDir", lightDir);
 		m_submarineShader->SetVec3("lightColor", m_lightSource->getLightColor());
 		m_submarineShader->SetVec3("viewPos", m_camera->getPosition()); 
@@ -87,6 +92,7 @@ void RunProgram::render()
 		m_submarineShader->setMat4("view", m_camera->getViewMatrix());
 		m_submarineShader->setMat4("model", m_submarine->getModel());
 		m_submarineShader->setInt("texture_diffuse1", 0);
+		m_submarineShader->setInt("shadowMap", 1); // Tell the shader to use texture unit 1 for the shadow map
 		m_submarine->draw(*m_submarineShader);
 
 		for (auto& fish : m_fishes)
@@ -105,6 +111,8 @@ void RunProgram::render()
 		m_waterShader->setMat4("view", m_camera->getViewMatrix());
 		m_waterShader->setMat4("projection", m_camera->getProjectionMatrix());
 		m_waterShader->SetVec3("lightColor", m_lightSource->getLightColor());
+		m_waterShader->setMat4("lightSpaceMatrix", m_lightSpaceMatrix); // Pass the light space matrix
+		m_waterShader->setInt("shadowMap", 1);
 		m_water->draw(*m_waterShader);
 		glDepthMask(GL_TRUE);
 		glDisable(GL_BLEND);
@@ -127,6 +135,63 @@ float RunProgram::generateRandom(float min, float max)
 
 	float rand = uniformDist(gen);
 	return rand;
+}
+
+void RunProgram::generateShadowMap()
+{
+	// Activează shadow shader-ul
+	m_shadowShader->use();
+
+	// Calcularea matricii lightSpaceMatrix (proiecție + vizualizare pentru sursa de lumină)
+	glm::mat4 lightProjection = glm::ortho(-50.0f, 50.0f, -50.0f, 50.0f, 1.0f, 100.0f); // Proiecție ortografică
+	glm::mat4 lightView = glm::lookAt(m_lightSource->getPosition(), glm::vec3(0.0f), glm::vec3(0.0f, 1.0f, 0.0f)); // Privire din perspectiva luminii
+	m_lightSpaceMatrix = lightProjection * lightView; // Matricea de proiecție a umbrei
+	m_shadowShader->setMat4("lightSpaceMatrix", m_lightSpaceMatrix); // Transmite matricea la shader
+
+	// Desenează obiectele din scenă pentru a genera shadow map-ul
+
+	// Desenează submarinul
+	m_shadowShader->setMat4("model", m_submarine->getModelMatrix());
+	m_submarine->draw(*m_shadowShader);
+
+	// Desenează peștii
+	for (auto& fish : m_fishes)
+	{
+		m_shadowShader->setMat4("model", fish->getModelMatrix());
+		fish->draw(m_shadowShader);
+	}
+
+	// Opriți framebuffer-ul pentru shadow map și reveniți la framebuffer-ul principal
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+void RunProgram::generateShadowMapTexture()
+{
+	unsigned int shadowFBO;
+	glGenFramebuffers(1, &shadowFBO);  // Creează framebuffer-ul pentru shadow map
+	glBindFramebuffer(GL_FRAMEBUFFER, shadowFBO);
+
+	// Crearea unei texturi pentru shadow map
+
+	glGenTextures(1, &m_shadowMap);
+	glBindTexture(GL_TEXTURE_2D, m_shadowMap);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, 1024, 1024, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, m_shadowMap, 0);
+	glDrawBuffer(GL_NONE);
+	glReadBuffer(GL_NONE);
+
+	// Asigură-te că framebuffer-ul este complet
+	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+		std::cout << "ERROR::FRAMEBUFFER:: Shadow map framebuffer is not complete!" << std::endl;
+	}
+
+	// Setează viewport-ul și curăță adâncimea
+	glViewport(0, 0, m_SCR_WIDTH, m_SCR_HEIGHT);  // Dimensiuni pentru shadow map
+	glClear(GL_DEPTH_BUFFER_BIT);
 }
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
@@ -227,6 +292,8 @@ void RunProgram::initializePaths()
 	m_lightSourceShader = std::make_unique<Shader>((m_currentPath + "\\Shaders\\LightSource.vs").c_str(), (m_currentPath + "\\Shaders\\LightSource.fs").c_str());
 	m_waterShader = std::make_unique<Shader>((m_currentPath + "\\Shaders\\Water.vs").c_str(), (m_currentPath + "\\Shaders\\Water.fs").c_str());
 	m_skyboxShader = std::make_unique<Shader>((m_currentPath + "\\Shaders\\Skybox.vs").c_str(), (m_currentPath + "\\Shaders\\Skybox.fs").c_str());
+
+	m_shadowShader = std::make_unique<Shader>((m_currentPath + "\\Shaders\\Shadow.vs").c_str(), (m_currentPath + "\\Shaders\\Shadow.fs").c_str());
 }
 
 void RunProgram::createWater()
@@ -290,6 +357,7 @@ void RunProgram::createFishes()
     std::vector<float> linearFishHeights(FishCount);
     std::vector<float> movementLimitsX(FishCount); // Radius on X axis (ellipse)
     std::vector<float> movementLimitsZ(FishCount); // Radius on Z axis (ellipse)
+	std::vector<float> angles(FishCount);
 
     const int waterSurface = m_water->getSurface(); // water max
     const int waterBottom = m_water->getBottom(); // water min
@@ -298,6 +366,7 @@ void RunProgram::createFishes()
 
     for (int i = 0; i < FishCount; ++i)
     {
+		angles[i] = generateRandom(0.f, 360.f);
         movementLimitsX[i] = generateRandom(1.0f, maxRadius); 
         movementLimitsZ[i] = generateRandom(1.0f, maxRadius);
     }
@@ -317,8 +386,8 @@ void RunProgram::createFishes()
 
         glm::vec3 startPosition(randomX, linearFishHeights[i], randomZ);
         glm::vec3 scale(22.f);
-
-        m_fishes.push_back(std::make_shared<Fish>(fishPath, startPosition, scale, linearFishSpeeds[i], movementLimitsX[i], movementLimitsZ[i]));
+		
+        m_fishes.push_back(std::make_shared<Fish>(fishPath, startPosition, scale, linearFishSpeeds[i], movementLimitsX[i], movementLimitsZ[i],angles[i]));
     }
 }
 

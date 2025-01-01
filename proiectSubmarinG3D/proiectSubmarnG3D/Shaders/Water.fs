@@ -4,6 +4,7 @@ out vec4 FragColor;
 in vec2 TexCoord;   // Texture coordinates from vertex shader
 in vec3 FragPos;    // Fragment position in world space
 in vec3 Normal;     // Interpolated normal vector from vertex shader
+in vec4 FragPosLightSpace;  // Fragment position in light space (for shadow)
 
 uniform vec3 lightDir;      // Normalized light direction (from application)
 uniform vec3 viewPos;       // Position of the camera (viewer) in world space
@@ -15,22 +16,50 @@ uniform int isBottomFace;       // Flag to indicate if it's the bottom face
 
 uniform float time;             // Time for animating waves
 
+// Shadow map
+uniform sampler2D shadowMap;  // The shadow map
+uniform float nearPlane;      // Near plane for shadow depth mapping
+uniform float farPlane;       // Far plane for shadow depth mapping
+
+// Function to calculate shadow intensity
+float ShadowCalculation(vec4 fragPosLightSpace) {
+    // Perform perspective divide
+    vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
+    projCoords = projCoords * 0.5 + 0.5; // Transform to [0, 1] range
+
+    // Check if the fragment is within the shadow map's bounds
+    if (projCoords.z > 1.0 || projCoords.x < 0.0 || projCoords.x > 1.0 || projCoords.y < 0.0 || projCoords.y > 1.0)
+        return 1.0; // Outside shadow map, no shadow
+
+    // Retrieve the depth value from the shadow map
+    float closestDepth = texture(shadowMap, projCoords.xy).r;
+
+    // Compare depth of current fragment with the depth stored in the shadow map
+    float currentDepth = projCoords.z;
+    float shadow = currentDepth > closestDepth + 0.005 ? 1.0 : 0.0; // Simple bias to prevent acne
+
+    return shadow;
+}
+
 void main()
 {
     vec3 baseColor;
-    vec2 uv;
     vec3 finalColor;
 
     // Normalize the interpolated normal
     vec3 norm = normalize(Normal);
 
     if (isBottomFace == 1) {
-        // Sand face (no waves)
-        uv = TexCoord;  // Use standard texture coordinates for the bottom
-        baseColor = texture(sandTexture, uv).rgb;  
-        finalColor = baseColor;
+        // Sand face (no waves, apply shadow)
+        vec2 uv = TexCoord;  // Use standard texture coordinates for the bottom
+        baseColor = texture(sandTexture, uv).rgb;
+
+        // Calculate shadow on sand face
+        float shadow = ShadowCalculation(FragPosLightSpace);
+        finalColor = baseColor * (1.0 - shadow); // Darken based on shadow
+
     } else {
-        // Water face (apply waves)
+        // Water face (apply waves, no shadow)
         vec2 texCoord = FragPos.xz * 0.1; // Scale texture coordinates
 
         // Modulate wave amplitude based on light direction
@@ -38,11 +67,10 @@ void main()
 
         // Create dynamic waves influenced by light
         vec2 uvOffset = vec2(0.0, sin(time * 1.5 + FragPos.x * 0.5) * waveAmplitude); 
-        uv = texCoord + uvOffset;
+        vec2 uv = texCoord + uvOffset;
 
         baseColor = texture(waterTexture, uv).rgb;
 
-        // Mix base color with a blue tint for water
         finalColor = baseColor;
     }
 

@@ -31,19 +31,15 @@ public:
 
 	void setColor(glm::vec3 color);
 
-	void SetModelMatrix(glm::mat4 modelMatrix) override;
+	void setModelMatrix(glm::mat4 modelMatrix) { m_mat = modelMatrix; }
 
-	glm::mat4& GetModelMatrix() override;
+	glm::mat4& getModelMatrix() { return m_mat; }
 
 	void SetPosition(glm::vec3 pos) { m_position = pos; }
 
 	Model& getModel(){return m_model;}
 
 	void setModel(const Model& model){m_model = model;}
-
-	glm::mat4& getModelMatrix(){return m_mat;}
-
-	void setModelMatrix(const glm::mat4& modelMatrix){m_mat = modelMatrix;}
 
 	std::string getPath() const{return m_path;}
 

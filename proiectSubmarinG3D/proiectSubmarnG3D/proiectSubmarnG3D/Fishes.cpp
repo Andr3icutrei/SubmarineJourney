@@ -22,8 +22,6 @@ void Fish::update(float deltaTime)
     // Update position along the ellipse
     m_position.x = m_limitX * cos(glm::radians(m_angle));
     m_position.z = m_limitZ * sin(glm::radians(m_angle));
-
-    
 }
 
 void Fish::draw(std::unique_ptr<Shader>& Shader)

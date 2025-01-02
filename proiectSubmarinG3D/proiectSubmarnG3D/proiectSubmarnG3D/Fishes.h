@@ -5,6 +5,7 @@
 #include "Model.h"
 #include "Shader.h"
 #include "IObject.h"
+#include "glfw3.h"
 
 class Fish : public IObject
 {

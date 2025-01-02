@@ -111,9 +111,6 @@
     <None Include="..\Shaders\Skybox.vs">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="..\Shaders\Object.fs">
-      <Filter>Shaders</Filter>
-    </None>
     <None Include="..\Shaders\Object.vs">
       <Filter>Shaders</Filter>
     </None>
@@ -121,6 +118,9 @@
       <Filter>Shaders</Filter>
     </None>
     <None Include="Shadow.fs">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\Shaders\Object.fs">
       <Filter>Shaders</Filter>
     </None>
   </ItemGroup>

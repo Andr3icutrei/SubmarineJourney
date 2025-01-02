@@ -75,8 +75,12 @@ private:
     std::unique_ptr<Shader> m_shadowShader;
 
     unsigned int m_shadowMap;
+    unsigned int m_shadowFBO;
 
     glm::mat4 m_lightSpaceMatrix;
+
+    const float m_SHADOW_WIDTH = 1024;
+    const float m_SHADOW_HEIGTH = 1024;
 
     double deltaTime = 0.0f;
     double lastFrame = 0.0f;
@@ -96,6 +100,9 @@ private:
 
     void generateShadowMap();
     void generateShadowMapTexture();
+
+    glm::mat4 calculateLightProjection(const glm::vec3& lightDir, const glm::mat4& cameraView, const glm::mat4& cameraProjection);
+
 public:
     // Static method to get the instance of the class
     static RunProgram* getInstance();

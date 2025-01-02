@@ -1,73 +1,72 @@
 #version 330 core
 
-out vec4 FragColor;
+in vec3 fragPos;       // Fragment position in world space
+in vec3 normal;        // Normal vector at the fragment's location
+in vec2 texCoord;      // Texture coordinates passed from the vertex shader
+in vec4 fragPosLightSpace;  // Fragment position in light space (passed from vertex shader)
 
-in vec2 TexCoord;      // Texture coordinates (for submarine texture)
-in vec3 FragPos;       // World space position of the fragment
-in vec3 Normal;        // World space normal of the fragment
-in vec4 FragPosLightSpace;  // Fragment position in light space
+out vec4 FragColor;    // Output color of the fragment
 
-uniform vec3 lightDir;    // Directional light direction (e.g., sun direction)
-uniform vec3 lightColor;  // Color of the light
-uniform vec3 viewPos;     // Camera position (view position)
-uniform sampler2D texture_diffuse1; // Diffuse texture for the submarine
-uniform sampler2D shadowMap;   // Shadow map sampler
+// Light properties (you would usually pass these as uniforms)
+uniform vec3 lightPos;     // Position of the light source (e.g., sun)
+uniform vec3 lightColor;   // Color of the light source (e.g., white light)
+uniform vec3 viewPos;      // Camera position (used for specular calculation)
+uniform sampler2D texture_diffuse1; // The texture of the object
 
-// Function to calculate the shadow factor
-float ShadowCalculation(vec4 fragPosLightSpace)
+// Shadow map and parameters
+uniform sampler2D shadowMap;  // The shadow map
+
+// Function to calculate shadow intensity based on the depth from the shadow map
+float ShadowCalculation(vec4 fragPosLightSpace) 
 {
-    // Perform perspective divide to get the normalized device coordinates
     vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
-    
-    // Transform from [0,1] to [0,1] range (NDC space)
     projCoords = projCoords * 0.5 + 0.5;
 
-    // Check if the fragment is within the bounds of the shadow map
-    if (projCoords.z > 1.0 || projCoords.x < 0.0 || projCoords.x > 1.0 || projCoords.y < 0.0 || projCoords.y > 1.0)
+    if (projCoords.z > 1.0)
         return 0.0;
 
-    // Sample the depth from the shadow map at the given coordinates
-    float closestDepth = texture(shadowMap, projCoords.xy).r;  // Depth value from shadow map
-    float currentDepth = projCoords.z;  // Depth value of the current fragment
+    float shadow = 0.0;
+    float bias = 0.005; // Bias adjusted
+    vec2 texelSize = 1.0 / textureSize(shadowMap, 0); // Texel size
 
-    // Shadow bias to avoid shadow acne
-    float bias = 0.005;
+    // 3x3 PCF filtering
+    for (int x = -1; x <= 1; ++x) {
+        for (int y = -1; y <= 1; ++y) {
+            float closestDepth = texture(shadowMap, projCoords.xy + vec2(x, y) * texelSize).r;
+            shadow += (projCoords.z > closestDepth + bias) ? 1.0 : 0.0;
+        }
+    }
+    shadow /= 9.0; // Average shadow value
 
-    // Return 1.0 (no shadow) if the current fragment is in front of the shadow map
-    // Return 0.0 (shadow) otherwise
-    return currentDepth - bias > closestDepth ? 0.0 : 1.0;
+    return shadow;
 }
 
 void main()
 {
-    // Normalize the normal and light direction
-    vec3 norm = normalize(Normal);
-    vec3 lightDirection = normalize(lightDir);
+    // Texture sampling
+    vec3 objectColor = texture(texture_diffuse1, texCoord).rgb; // Sample the texture
 
-    // Ambient lighting (constant low light)
-    float ambientStrength = 0.6;
+    // Ambient lighting (constant light)
+    float ambientStrength = 0.2; // Increased ambient strength
     vec3 ambient = ambientStrength * lightColor;
 
-    // Diffuse lighting (Lambert's cosine law)
-    float diff = max(dot(norm, -lightDirection), 0.0);
-    vec3 diffuse = diff * lightColor;
+    // Diffuse lighting (based on the angle between the surface normal and light direction)
+    vec3 norm = normalize(normal);                  // Normalize the normal vector
+    vec3 lightDir = normalize(lightPos - fragPos);  // Direction from fragment to light source
+    float diff = max(dot(norm, lightDir), 0.0);     // Dot product gives cosine of angle
+    vec3 diffuse = diff * lightColor;               // Scale diffuse light by light color
 
-    // Specular lighting (Phong reflection model)
-    float specularStrength = 0.6;
-    vec3 viewDir = normalize(viewPos - FragPos); // View direction
-    vec3 reflectDir = reflect(lightDirection, norm); // Reflected light direction
-    float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32); // Shininess factor
-    vec3 specular = specularStrength * spec * lightColor;
+    // Specular lighting (shiny highlights)
+    float specularStrength = 0.5; // Reduced specular strength
+    vec3 viewDir = normalize(viewPos - fragPos);                // Direction from fragment to camera
+    vec3 reflectDir = reflect(-lightDir, norm);                 // Reflection of the light vector
+    float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32);  // Phong specular reflection
+    vec3 specular = specularStrength * spec * lightColor;       // Specular component
 
-    // Combine the results: ambient + diffuse + specular
-    vec3 result = (ambient + diffuse + specular);
+    // Shadow Calculation
+    float shadow = ShadowCalculation(fragPosLightSpace);
 
-    // Get the texture color
-    vec4 texColor = texture(texture_diffuse1, TexCoord);
+    vec3 result = (ambient + diffuse + specular) * objectColor;
 
-    // Apply shadow to the final color based on the shadow calculation
-    float shadow = ShadowCalculation(FragPosLightSpace);
-
-    // Final color: Apply lighting, shadow, and texture color
-    FragColor = vec4(result, 1.0) * texColor * shadow;
+    FragColor = vec4(result, 1.0); // Final fragment color with shadow effect
 }

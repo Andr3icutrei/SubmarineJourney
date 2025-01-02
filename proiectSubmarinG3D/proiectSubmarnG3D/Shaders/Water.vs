@@ -6,10 +6,12 @@ layout (location = 2) in vec3 aNormal;   // Vertex normal
 out vec2 TexCoord;  // Pass texture coordinate to fragment shader
 out vec3 FragPos;   // Pass fragment position in world space
 out vec3 Normal;    // Pass normal vector to fragment shader
+out vec4 FragPosLightSpace;
 
 uniform mat4 model;       // Model matrix
 uniform mat4 view;        // View matrix
 uniform mat4 projection;  // Projection matrix
+uniform mat4 lightSpaceMatrix;
 
 void main()
 {
@@ -24,4 +26,6 @@ void main()
 
     // Compute final vertex position in clip space
     gl_Position = projection * view * vec4(FragPos, 1.0);
+
+    FragPosLightSpace = lightSpaceMatrix * vec4(FragPos, 1.0);
 }

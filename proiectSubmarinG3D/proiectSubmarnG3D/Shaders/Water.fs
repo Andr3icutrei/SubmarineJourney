@@ -21,31 +21,25 @@ uniform sampler2D shadowMap;  // The shadow map
 uniform float nearPlane;      // Near plane for shadow depth mapping
 uniform float farPlane;       // Far plane for shadow depth mapping
 
-// Function to calculate shadow intensity
 float ShadowCalculation(vec4 fragPosLightSpace) {
-    // Perform perspective divide
-    vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
-    projCoords = projCoords * 0.5 + 0.5; // Transform to [0, 1] range
+    vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w; // Normalizare
+    projCoords = projCoords * 0.5 + 0.5; // Din [-1, 1] în [0, 1]
 
-    // Check if the fragment is within the shadow map's bounds
-    if (projCoords.z > 1.0 || projCoords.x < 0.0 || projCoords.x > 1.0 || projCoords.y < 0.0 || projCoords.y > 1.0)
-        return 1.0; // Outside shadow map, no shadow
+    if (projCoords.z > 1.0)
+        return 0.0;
 
-    // Retrieve the depth value from the shadow map
-    float closestDepth = texture(shadowMap, projCoords.xy).r;
-
-    // Compare depth of current fragment with the depth stored in the shadow map
+    float closestDepth = texture(shadowMap, projCoords.xy).r; // Adâncime din hart?
     float currentDepth = projCoords.z;
-    float shadow = currentDepth > closestDepth + 0.005 ? 1.0 : 0.0; // Simple bias to prevent acne
 
-    return shadow;
+    float bias = 0.005; // Compensare pentru artefacte
+    return currentDepth > closestDepth + bias ? 1.0 : 0.0;
 }
 
 void main()
 {
     vec3 baseColor;
     vec3 finalColor;
-
+    float shadow=0.0;
     // Normalize the interpolated normal
     vec3 norm = normalize(Normal);
 
@@ -55,8 +49,8 @@ void main()
         baseColor = texture(sandTexture, uv).rgb;
 
         // Calculate shadow on sand face
-        float shadow = ShadowCalculation(FragPosLightSpace);
-        finalColor = baseColor * (1.0 - shadow); // Darken based on shadow
+        shadow = ShadowCalculation(FragPosLightSpace);
+        finalColor = baseColor;
 
     } else {
         // Water face (apply waves, no shadow)
@@ -94,6 +88,6 @@ void main()
     float alpha = 0.5;
 
     // Final fragment color with lighting and base texture
-    vec3 result = ambient + diffuse + specular;
+    vec3 result = ambient + (1.0-shadow)*(diffuse + specular);
     FragColor = vec4(result, alpha) * vec4(finalColor, 1.0);
 }

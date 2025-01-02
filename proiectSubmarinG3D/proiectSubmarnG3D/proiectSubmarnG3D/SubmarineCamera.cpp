@@ -4,7 +4,7 @@ SubmarineCamera::SubmarineCamera(int newHeight, int newWidth, glm::vec3 position
 	height(newHeight),
 	width(newWidth),
 	cameraPosition(position),
-	cameraOffset(0.0f, 0.3f, 1.2f),
+	cameraOffset(0.0f, 0.3f, 3.2f),
 	worldUp(glm::vec3(0.0f, 1.0f, 0.0f)),
 	yaw(YAW),
 	pitch(PITCH),

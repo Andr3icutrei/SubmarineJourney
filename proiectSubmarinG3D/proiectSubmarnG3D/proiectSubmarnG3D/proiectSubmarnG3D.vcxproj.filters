@@ -43,6 +43,9 @@
     <ClCompile Include="Fishes.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Coral.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="SubmarineCamera.h">
@@ -88,6 +91,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Fishes.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Coral.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

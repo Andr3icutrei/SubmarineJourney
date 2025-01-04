@@ -34,6 +34,7 @@
 #include "Water.h"
 #include "Skybox.h"
 #include "Fishes.h"
+#include "Coral.h"
 
 class RunProgram
 {
@@ -67,6 +68,7 @@ private:
     std::shared_ptr<LightSource> m_lightSource;
     std::shared_ptr<Skybox> m_skybox;
     std::vector<std::shared_ptr<Fish>> m_fishes;
+    std::vector<std::shared_ptr<Coral>> m_corals;
 
     std::unique_ptr<Shader> m_submarineShader;
     std::unique_ptr<Shader> m_lightSourceShader;
@@ -93,6 +95,7 @@ private:
     void createLightSource();
     void createSkybox();
     void createFishes();
+    void createCorals();
     void initializeCameras();
     void render();
 

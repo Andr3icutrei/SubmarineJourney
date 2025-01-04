@@ -22,6 +22,7 @@ void RunProgram::run()
 	createSubmarine();
 	createWater();
 	createFishes();
+	createCorals();
 	createSkybox();
 	render();
 }
@@ -103,6 +104,12 @@ void RunProgram::render()
 			fish->draw(m_submarineShader);
 		}
 
+		for (auto& coral : m_corals)
+		{
+			m_submarineShader->setMat4("model", coral->getModelMatrix());
+			coral->draw(m_submarineShader);
+		}
+
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glDepthMask(GL_FALSE);
@@ -178,6 +185,12 @@ void RunProgram::generateShadowMap()
 	for (auto& fish : m_fishes) {
 		m_shadowShader->setMat4("model", fish->getModelMatrix());
 		fish->draw(m_shadowShader);
+	}
+
+	for (auto& coral : m_corals)
+	{
+		m_submarineShader->setMat4("model", coral->getModelMatrix());
+		coral->draw(m_submarineShader);
 	}
 
 	glm::mat4 model = glm::translate(glm::mat4(1.0f), m_water->getPosition());
@@ -426,5 +439,27 @@ void RunProgram::createFishes()
 		
         m_fishes.push_back(std::make_shared<Fish>(fishPath, startPosition, scale, linearFishSpeeds[i], movementLimitsX[i], movementLimitsZ[i],angles[i]));
     }
+}
+
+void RunProgram::createCorals()
+{
+	std::string coralPath = m_currentPath + "\\Models\\Coral\\coral1.obj";
+
+	const int CoralCount = 25;
+	float maxRadius = m_water->getDistanceFromCenter(); 
+	float yPosition = m_water->getBottom()+4.f;
+	for (int i = 0; i < CoralCount; ++i) 
+	{
+		float randomX = generateRandom(-maxRadius, maxRadius);
+		float randomZ = generateRandom(-maxRadius, maxRadius);
+
+		// debug
+		std::cout << "Coral " << i << " position: X=" << randomX << ", Y=" << yPosition << ", Z=" << randomZ << '\n';
+
+		glm::vec3 startPosition(randomX, yPosition, randomZ);
+		glm::vec3 scale(0.8f); 
+
+		m_corals.push_back(std::make_shared<Coral>(coralPath, startPosition, scale));
+	}
 }
 

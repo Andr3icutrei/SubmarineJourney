@@ -81,7 +81,7 @@ Submarine& Submarine::operator=(Submarine&& other) noexcept
 	return *this;
 }
 
-void Submarine::updateSubmarine(Dir dir, double dt, Shader& shader, bool surface)
+void Submarine::updateSubmarine(Dir dir, double dt, Shader& shader, bool surface, bool bottom)
 {
 	float velocity = (float)dt * movementSpeed;
 
@@ -98,7 +98,7 @@ void Submarine::updateSubmarine(Dir dir, double dt, Shader& shader, bool surface
 		if (roll <= -20.0f)
 			roll = -20.0f;
 
-		yaw += 0.05f;
+		yaw += 0.1f;
 		break;
 	}
 	case LEFT: {
@@ -107,7 +107,7 @@ void Submarine::updateSubmarine(Dir dir, double dt, Shader& shader, bool surface
 		if (roll >= 20.0f)
 			roll = 20.0f;
 
-		yaw -= 0.05f;
+		yaw -= 0.1f;
 		break;
 	}
 	case UP: {
@@ -130,8 +130,8 @@ void Submarine::updateSubmarine(Dir dir, double dt, Shader& shader, bool surface
 	}
 	}
 
-	if (surface && pitch >= 0.0f)
-		updateForwardDirectionSurface();
+	if (surface && pitch >= 0.0f || bottom && pitch <= 0.0f)
+		updateDirection();
 	else 
 		updateForwardDirection();
 
@@ -180,7 +180,7 @@ void Submarine::updateForwardDirection()
 	forwardDirection = glm::normalize(direction);
 }
 
-void Submarine::updateForwardDirectionSurface()
+void Submarine::updateDirection()
 {
 	glm::vec3 direction;
 
@@ -210,9 +210,9 @@ void Submarine::sideTilt(Dir dir)
 	{
 		float tilt;
 		if (roll < 0.0f)
-			tilt = +0.05f;
+			tilt = +0.1f;
 		else
-			tilt = -0.05f;
+			tilt = -0.1f;
 
 		roll += tilt;
 	}

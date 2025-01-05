@@ -24,7 +24,7 @@ public:
 	Submarine(Submarine&& other) noexcept;
 	Submarine& operator=(Submarine&& other) noexcept;
 
-	void updateSubmarine(Dir dir, double dt, Shader& shader, bool surface);
+	void updateSubmarine(Dir dir, double dt, Shader& shader, bool surface, bool bottom);
 	glm::mat4 getModel();
 	glm::vec3 getPosition();
 	glm::vec3 getForwardDirection();
@@ -48,7 +48,7 @@ private:
 	Model m_model;
 
 	void updateForwardDirection();
-	void updateForwardDirectionSurface();
+	void updateDirection();
 	void updateSubmarineDirection();
 	void sideTilt(Dir dir);
 };

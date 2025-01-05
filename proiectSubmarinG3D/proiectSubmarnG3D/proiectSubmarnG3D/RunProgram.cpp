@@ -103,8 +103,9 @@ void RunProgram::render()
 		m_submarineShader->setInt("shadowMap", 2); // Tell the shader to use texture unit 1 for the shadow map
 		m_submarine->draw(*m_submarineShader);
 		bool surface = (submarine->getPosition().y >= 0.0f);
+		bool bottom = (submarine->getPosition().y <= -16.0f);
 
-		processInput(window, submarine, deltaTime, surface);
+		processInput(window, submarine, deltaTime, surface, bottom);
 
 		for (auto& fish : m_fishes)
 		{
@@ -257,22 +258,22 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 		keyState[key] = false;
 }
 
-void processInput(GLFWwindow* window, std::shared_ptr<Submarine> submarine, float deltaTime, bool surface)
+void processInput(GLFWwindow* window, std::shared_ptr<Submarine> submarine, float deltaTime, bool surface, bool bottom)
 {
 	if (keyState[GLFW_KEY_A])
-		submarine->updateSubmarine(Dir::LEFT, deltaTime, RunProgram::getInstance()->getSubmarineShader(), surface);
+		submarine->updateSubmarine(Dir::LEFT, deltaTime, RunProgram::getInstance()->getSubmarineShader(), surface, bottom);
 
 	if (keyState[GLFW_KEY_D])
-		submarine->updateSubmarine(Dir::RIGHT, deltaTime, RunProgram::getInstance()->getSubmarineShader(), surface);
+		submarine->updateSubmarine(Dir::RIGHT, deltaTime, RunProgram::getInstance()->getSubmarineShader(), surface, bottom);
 
 	if (keyState[GLFW_KEY_SPACE])
-		submarine->updateSubmarine(Dir::UP, deltaTime, RunProgram::getInstance()->getSubmarineShader(), surface);
+		submarine->updateSubmarine(Dir::UP, deltaTime, RunProgram::getInstance()->getSubmarineShader(), surface, bottom);
 
 	if (keyState[GLFW_KEY_S])
-		submarine->updateSubmarine(Dir::DOWN, deltaTime, RunProgram::getInstance()->getSubmarineShader(), surface);
+		submarine->updateSubmarine(Dir::DOWN, deltaTime, RunProgram::getInstance()->getSubmarineShader(), surface, bottom);
 
 	if (keyState[GLFW_KEY_W])
-		submarine->updateSubmarine(Dir::FORWARD, deltaTime, RunProgram::getInstance()->getSubmarineShader(), surface);
+		submarine->updateSubmarine(Dir::FORWARD, deltaTime, RunProgram::getInstance()->getSubmarineShader(), surface, bottom);
 
 	if (keyState[GLFW_KEY_ESCAPE])
 		glfwSetWindowShouldClose(window, true);

@@ -160,7 +160,7 @@ void Water::draw(Shader& shader)
 
     // Model matrix for scaling and positioning
     glm::mat4 model = glm::mat4(1.0f);
-    model = glm::translate(model, position);
+    model = glm::translate(model, position + glm::vec3(0.f, -6.f, 0.f));
     model = glm::scale(model, scale);
 
     shader.setMat4("model", model);

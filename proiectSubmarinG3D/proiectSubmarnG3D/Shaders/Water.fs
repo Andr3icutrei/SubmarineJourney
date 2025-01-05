@@ -22,17 +22,30 @@ uniform float nearPlane;      // Near plane for shadow depth mapping
 uniform float farPlane;       // Far plane for shadow depth mapping
 
 float ShadowCalculation(vec4 fragPosLightSpace) {
-    vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w; // Normalizare
-    projCoords = projCoords * 0.5 + 0.5; // Din [-1, 1] în [0, 1]
+    vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
+    projCoords = projCoords * 0.5 + 0.5;
 
-    if (projCoords.z > 1.0)
+    if (projCoords.x < 0.0 || projCoords.x > 1.0 || projCoords.y < 0.0 || projCoords.y > 1.0) {
         return 0.0;
+    }
 
-    float closestDepth = texture(shadowMap, projCoords.xy).r; // Adâncime din hart?
+    float closestDepth = texture(shadowMap, projCoords.xy).r;
     float currentDepth = projCoords.z;
 
-    float bias = 0.005; // Compensare pentru artefacte
-    return currentDepth > closestDepth + bias ? 1.0 : 0.0;
+    float bias = max(0.005 * (1.0 - dot(Normal, lightDir)), 0.005);
+
+    float shadow = 0.0;
+
+    vec2 texelSize = 1.0 / textureSize(shadowMap, 0);
+    for (int x = -1; x <= 1; ++x) {
+        for (int y = -1; y <= 1; ++y) {
+            vec2 offset = vec2(x, y) * texelSize;
+            float sampleDepth = texture(shadowMap, projCoords.xy + offset).r;
+            shadow += currentDepth > sampleDepth + bias ? 1.0 : 0.0;
+        }
+    }
+    shadow /= 9.0; 
+    return shadow;
 }
 
 void main()
@@ -42,7 +55,7 @@ void main()
     float shadow=0.0;
     // Normalize the interpolated normal
     vec3 norm = normalize(Normal);
-
+    float alpha ;
     if (isBottomFace == 1) {
         // Sand face (no waves, apply shadow)
         vec2 uv = TexCoord;  // Use standard texture coordinates for the bottom
@@ -51,7 +64,7 @@ void main()
         // Calculate shadow on sand face
         shadow = ShadowCalculation(FragPosLightSpace);
         finalColor = baseColor;
-
+        alpha=1;
     } else {
         // Water face (apply waves, no shadow)
         vec2 texCoord = FragPos.xz * 0.1; // Scale texture coordinates
@@ -66,6 +79,7 @@ void main()
         baseColor = texture(waterTexture, uv).rgb;
 
         finalColor = baseColor;
+        alpha=0.5;
     }
 
     // Ambient lighting
@@ -85,7 +99,7 @@ void main()
     vec3 specular = specularStrength * spec * vec3(1.0) * lightColor;
 
     // Set alpha for water transparency (semi-transparent water)
-    float alpha = 0.5;
+
 
     // Final fragment color with lighting and base texture
     vec3 result = ambient + (1.0-shadow)*(diffuse + specular);

@@ -6,7 +6,7 @@ Submarine::Submarine(std::string fileName)
 	pitch(0.0f),
 	roll(0.0f),
 	movementSpeed(200.0f),
-	submarineScale(0.2f),
+	submarineScale(0.4f),
 	submarinePosition(0.0f),
 	m_model(fileName,false)
 {
@@ -201,7 +201,7 @@ void Submarine::updateSubmarineDirection()
 	submarineModel = glm::rotate(submarineModel, glm::radians(pitch), glm::vec3(-1.0f, 0.0f, 0.0f));
 	submarineModel = glm::rotate(submarineModel, glm::radians(roll), glm::vec3(0.0f, 0.0f, -1.0f));
 
-	submarineModel = glm::scale(submarineModel, glm::vec3(0.2f));
+	submarineModel = glm::scale(submarineModel, submarineScale);
 }
 
 void Submarine::sideTilt(Dir dir)

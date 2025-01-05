@@ -44,8 +44,9 @@ void RunProgram::initializeCameras()
 
 void RunProgram::render()
 {
+
 	while (!glfwWindowShouldClose(window)) {
-		glm::vec3 lightDir=  glm::normalize(-m_lightSource->getPosition());
+		glm::vec3 lightDir = glm::normalize(-m_lightSource->getPosition());
 		double currentFrame = glfwGetTime();
 		deltaTime = currentFrame - lastFrame;
 		lastFrame = currentFrame;
@@ -64,8 +65,8 @@ void RunProgram::render()
 		m_skyboxShader->use();
 		m_skyboxShader->SetVec3("lightColor", m_lightSource->getLightColor());
 		m_skyboxShader->SetVec3("lightDir", lightDir);
-		m_skyboxShader->setMat4("view", m_camera->getViewMatrix());
-		m_skyboxShader->setMat4("projection",m_camera->getProjectionMatrix());
+		m_skyboxShader->setMat4("view", glm::mat4(glm::mat3(m_camera->getViewMatrix())));
+		m_skyboxShader->setMat4("projection", m_camera->getProjectionMatrix());
 		m_skyboxShader->setMat4("model", modelMatrix);
 		m_skybox->draw(*m_skyboxShader);
 
@@ -73,6 +74,7 @@ void RunProgram::render()
 		glDepthMask(GL_TRUE);
 		glEnable(GL_DEPTH_TEST);
 		glDepthFunc(GL_LESS);
+		glDisable(GL_CULL_FACE);
 
 		m_lightSourceShader->use();
 		m_lightSourceShader->setFloat("shininess", 0.8f);
@@ -87,20 +89,20 @@ void RunProgram::render()
 		m_submarineShader->use();
 		m_submarineShader->SetVec3("lightDir", lightDir);
 		m_submarineShader->SetVec3("lightColor", m_lightSource->getLightColor());
-		m_submarineShader->SetVec3("viewPos", m_camera->getPosition()); 
+		m_submarineShader->SetVec3("viewPos", m_camera->getPosition());
 		m_submarineShader->setMat4("projection", m_camera->getProjectionMatrix());
 		m_submarineShader->setMat4("view", m_camera->getViewMatrix());
 		m_submarineShader->setMat4("model", m_submarine->getModel());
 		m_submarineShader->setInt("texture_diffuse1", 0);
 		// Use the shadow map in the main rendering pass
-		glActiveTexture(GL_TEXTURE1);  // Use texture unit 1 for shadow map
+		glActiveTexture(GL_TEXTURE2);  // Use texture unit 1 for shadow map
 		glBindTexture(GL_TEXTURE_2D, m_shadowMap); // Bind the shadow map texture
-		m_submarineShader->setInt("shadowMap", 1); // Tell the shader to use texture unit 1 for the shadow map
+		m_submarineShader->setInt("shadowMap", 2); // Tell the shader to use texture unit 1 for the shadow map
 		m_submarine->draw(*m_submarineShader);
 
 		for (auto& fish : m_fishes)
 		{
-			fish->update(deltaTime); 
+			fish->update(deltaTime);
 			fish->draw(m_submarineShader);
 		}
 
@@ -122,7 +124,7 @@ void RunProgram::render()
 		m_waterShader->SetVec3("lightColor", m_lightSource->getLightColor());
 		m_waterShader->setMat4("lightSpaceMatrix", m_lightSpaceMatrix); // Pass the light space matrix
 		m_waterShader->setFloat("nearPlane", 1.f);  // Pass near plane
-		m_waterShader->setFloat("farPlane", 50.f);
+		m_waterShader->setFloat("farPlane", 500.f);
 		m_waterShader->setInt("shadowMap", 2);
 		glActiveTexture(GL_TEXTURE2);  // Use texture unit 1 for shadow map
 		glBindTexture(GL_TEXTURE_2D, m_shadowMap); // Bind the shadow map texture
@@ -138,7 +140,6 @@ void RunProgram::render()
 	// glfw: terminate, clearing all previously allocated GLFW resources
 	glfwTerminate();
 }
-
 float RunProgram::generateRandom(float min, float max)
 {
 	std::random_device rd;
@@ -154,30 +155,28 @@ float RunProgram::generateRandom(float min, float max)
 void RunProgram::generateShadowMap()
 {
 	m_shadowShader->use();
-
-	glViewport(0, 0, 2048,2048);
+	glViewport(0, 0, 4096, 4096);
 	glBindFramebuffer(GL_FRAMEBUFFER, m_shadowFBO);
 	glClear(GL_DEPTH_BUFFER_BIT);
 
-	// Compute light space matrix
-	// Step 1: Set the position of the light
-	glm::vec3 lightPos = glm::normalize(glm::vec3(-6.0f, 2.0f, -6.0f));
+	glm::vec3 lightPos = m_lightSource->getPosition() + glm::vec3(5.f, 0.f, 5.f);
 
-	// Step 2: Define the target point for the light (center of the scene)
-	glm::vec3 lightTarget = glm::vec3(0.0f, 0.0f, 0.0f); // Light points at the origin
+	glm::vec3 lightTarget = glm::vec3(0.0f, 0.0f, 0.0f);
 
-	// Step 3: Compute the light direction (from light position to target)
-	glm::vec3 lightDir = glm::normalize(lightPos - lightTarget); // Direction from light to the target
+	glm::vec3 lightDir = glm::normalize(lightPos - lightTarget);
 
-	// Step 4: Set up orthogonal projection (for directional light)
-	glm::mat4 lightProjection = glm::ortho(-100.f, 100.0f, -100.0f, 100.0f, 0.1f, 500.0f);
+	glm::mat4 lightProjection = glm::ortho(-200.0f, 200.0f, -200.0f, 200.0f, 0.1f, 300.0f);
 
-	// Step 5: Create the light view matrix using the light position and direction
-	glm::mat4 lightView = glm::lookAt(lightPos, lightTarget, glm::vec3(0.0f, 1.0f, 0.0f));
+	glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f);
+	if (glm::dot(lightDir, up) > 0.99f) {
+		up = glm::vec3(1.0f, 0.0f, 0.0f);
+	}
+	glm::mat4 lightView = glm::lookAt(lightPos, lightTarget, up);
 
 	m_lightSpaceMatrix = lightProjection * lightView;
 	m_shadowShader->setMat4("lightSpaceMatrix", m_lightSpaceMatrix);
-
+	glEnable(GL_CULL_FACE);
+	glCullFace(GL_FRONT);
 	// Render scene objects to depth map
 	m_shadowShader->setMat4("model", m_submarine->getModelMatrix());
 	m_submarine->draw(*m_shadowShader);
@@ -189,22 +188,17 @@ void RunProgram::generateShadowMap()
 
 	for (auto& coral : m_corals)
 	{
-		m_submarineShader->setMat4("model", coral->getModelMatrix());
-		coral->draw(m_submarineShader);
+		m_shadowShader->setMat4("model", coral->getModelMatrix());
+		coral->draw(m_shadowShader);
 	}
 
-	glm::mat4 model = glm::translate(glm::mat4(1.0f), m_water->getPosition());
-	m_shadowShader->setMat4("model",model);
-	m_water->draw(*m_shadowShader);
-
+	glCullFace(GL_BACK);
+	glDisable(GL_CULL_FACE);
 	// Unbind framebuffer and reset viewport
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glViewport(0, 0, m_SCR_WIDTH, m_SCR_HEIGHT);  // Reset to screen dimensions
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-	glDepthFunc(GL_LEQUAL);
 }
-
 
 void RunProgram::generateShadowMapTexture()
 {
@@ -215,7 +209,7 @@ void RunProgram::generateShadowMapTexture()
 	// Create the shadow map texture
 	glGenTextures(1, &m_shadowMap);
 	glBindTexture(GL_TEXTURE_2D, m_shadowMap);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, 2048, 2048, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, 4096, 4096, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -236,7 +230,7 @@ void RunProgram::generateShadowMapTexture()
 	}
 
 	// Unbind the framebuffer
-	glViewport(0, 0, m_SCR_WIDTH,m_SCR_HEIGHT);
+	glViewport(0, 0, m_SCR_WIDTH, m_SCR_HEIGHT);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
@@ -351,7 +345,7 @@ void RunProgram::createWater()
 	std::string strSandJpgPath = m_currentPath + "\\x64\\Debug\\sand.jpg";
 	const char* sandPath{ strSandJpgPath.c_str() };
 
-	m_water = std::make_shared<Water>(glm::vec3(0.0f, -4.0f, 3.0f), glm::vec3(80.0f, 8.0f, 80.0f), waterPath, sandPath);
+	m_water = std::make_shared<Water>(glm::vec3(0.0f, -4.0f, 3.0f), glm::vec3(200.0f, 20.0f, 200.0f), waterPath, sandPath);
 }
 
 void RunProgram::createSubmarine()
@@ -385,7 +379,7 @@ void RunProgram::createLightSource()
 	}
 
 	m_lightSource=std::make_shared<LightSource>(lightSourcePath,m_lightSourceShader, lightSourceScale);
-	m_lightSource->setPosition(glm::vec3(-3.0f, 4.0f, -8.0f));
+	m_lightSource->setPosition(glm::vec3(-3.0f, 8.0f, -8.0f));
 	m_lightSource->setLightColor(lightColor);
 }
 
@@ -418,13 +412,13 @@ void RunProgram::createFishes()
         movementLimitsZ[i] = generateRandom(1.0f, maxRadius);
     }
 
-	linearFishHeights[0]=-6.f;
+	linearFishHeights[0]= -12.f;
 	for (int i = 1; i < FishCount; ++i)
 	{
 		if (i % 2)
-			linearFishHeights[i] = -7.f;
+			linearFishHeights[i] = -13.f;
 		else
-			linearFishHeights[i] = -6.f;
+			linearFishHeights[i] = -12.f;
 	}
 
     for (int i = 0; i < FishCount; ++i)
@@ -435,7 +429,7 @@ void RunProgram::createFishes()
         std::cout << "Fish " << i << " position: X=" << randomX << ", Y=" << linearFishHeights[i] << ", Z=" << randomZ << '\n';
 
         glm::vec3 startPosition(randomX, linearFishHeights[i], randomZ);
-        glm::vec3 scale(22.f);
+        glm::vec3 scale(50.f);
 		
         m_fishes.push_back(std::make_shared<Fish>(fishPath, startPosition, scale, linearFishSpeeds[i], movementLimitsX[i], movementLimitsZ[i],angles[i]));
     }
@@ -447,7 +441,7 @@ void RunProgram::createCorals()
 
 	const int CoralCount = 25;
 	float maxRadius = m_water->getDistanceFromCenter(); 
-	float yPosition = m_water->getBottom()+4.f;
+	float yPosition = m_water->getBottom()+4.5f;
 	for (int i = 0; i < CoralCount; ++i) 
 	{
 		float randomX = generateRandom(-maxRadius, maxRadius);
@@ -457,7 +451,7 @@ void RunProgram::createCorals()
 		std::cout << "Coral " << i << " position: X=" << randomX << ", Y=" << yPosition << ", Z=" << randomZ << '\n';
 
 		glm::vec3 startPosition(randomX, yPosition, randomZ);
-		glm::vec3 scale(0.8f); 
+		glm::vec3 scale(2.f); 
 
 		m_corals.push_back(std::make_shared<Coral>(coralPath, startPosition, scale));
 	}

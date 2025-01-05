@@ -5,7 +5,7 @@ Submarine::Submarine(std::string fileName)
 	yaw(-90.0f),
 	pitch(0.0f),
 	roll(0.0f),
-	movementSpeed(200.0f),
+	movementSpeed(20.0f),
 	submarineScale(0.4f),
 	submarinePosition(0.0f),
 	m_model(fileName,false)
@@ -93,26 +93,26 @@ void Submarine::updateSubmarine(Dir dir, double dt, Shader& shader, bool surface
 		break;
 	}
 	case RIGHT: {
-		roll -= 1.0f;
+		roll -= 0.05f;
 
 		if (roll <= -20.0f)
 			roll = -20.0f;
 
-		yaw += 1.0f;
+		yaw += 0.05f;
 		break;
 	}
 	case LEFT: {
-		roll += 1.0f;
+		roll += 0.05f;
 
 		if (roll >= 20.0f)
 			roll = 20.0f;
 
-		yaw -= 1.0f;
+		yaw -= 0.05f;
 		break;
 	}
 	case UP: {
 		if (pitch <= 20.0f)
-			pitch += 0.5f;
+			pitch += 0.05f;
 
 		if (pitch >= 20.0f)
 			pitch = 20.0f;
@@ -121,7 +121,7 @@ void Submarine::updateSubmarine(Dir dir, double dt, Shader& shader, bool surface
 	}
 	case DOWN: {
 		if (pitch >= -20.0f)
-			pitch -= 0.5f;
+			pitch -= 0.05f;
 
 		if (pitch <= -20.0f)
 			pitch = -20.0f;
@@ -210,9 +210,9 @@ void Submarine::sideTilt(Dir dir)
 	{
 		float tilt;
 		if (roll < 0.0f)
-			tilt = +0.5f;
+			tilt = +0.05f;
 		else
-			tilt = -0.5f;
+			tilt = -0.05f;
 
 		roll += tilt;
 	}

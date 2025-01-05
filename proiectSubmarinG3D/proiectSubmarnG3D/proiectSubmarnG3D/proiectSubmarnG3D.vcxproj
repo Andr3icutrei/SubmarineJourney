@@ -148,6 +148,7 @@
     <ClCompile Include="Coral.cpp" />
     <ClCompile Include="Fishes.cpp" />
     <ClCompile Include="ICamera.cpp" />
+    <ClCompile Include="KeyStateManager.cpp" />
     <ClCompile Include="RunProgram.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
@@ -211,6 +212,7 @@
     <ClInclude Include="Coral.h" />
     <ClInclude Include="Fishes.h" />
     <ClInclude Include="ICamera.h" />
+    <ClInclude Include="KeyStateManager.h" />
     <ClInclude Include="RunProgram.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>

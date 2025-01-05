@@ -1,4 +1,5 @@
 ﻿#include "RunProgram.h"
+#include "KeyStateManager.h"
 
 RunProgram::RunProgram() {
 }
@@ -51,6 +52,8 @@ void RunProgram::render()
 		deltaTime = currentFrame - lastFrame;
 		lastFrame = currentFrame;
 
+		std::shared_ptr<Submarine> submarine = RunProgram::getInstance()->getSubmarine();
+
 		generateShadowMap();
 
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
@@ -99,6 +102,9 @@ void RunProgram::render()
 		glBindTexture(GL_TEXTURE_2D, m_shadowMap); // Bind the shadow map texture
 		m_submarineShader->setInt("shadowMap", 2); // Tell the shader to use texture unit 1 for the shadow map
 		m_submarine->draw(*m_submarineShader);
+		bool surface = (submarine->getPosition().y >= 0.0f);
+
+		processInput(window, submarine, deltaTime, surface);
 
 		for (auto& fish : m_fishes)
 		{
@@ -245,44 +251,40 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
-	RunProgram* instance = RunProgram::getInstance();
-	float deltaTime = instance->getDeltaTime();
-	std::shared_ptr<Submarine> submarine = instance->getSubmarine();
-	std::shared_ptr<Water> water = instance->getWater();
+	if (action == GLFW_PRESS)
+		keyState[key] = true;
+	else if (action == GLFW_RELEASE)
+		keyState[key] = false;
+}
 
-	bool surface = false;
+void processInput(GLFWwindow* window, std::shared_ptr<Submarine> submarine, float deltaTime, bool surface)
+{
+	if (keyState[GLFW_KEY_A])
+		submarine->updateSubmarine(Dir::LEFT, deltaTime, RunProgram::getInstance()->getSubmarineShader(), surface);
 
-	if (submarine->getPosition().y >= 0.0f)
-		surface = true;
-
-	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-		RunProgram::getInstance()->getSubmarine()->updateSubmarine(Dir::LEFT, deltaTime, RunProgram::getInstance()->getSubmarineShader(), surface);
-
-	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+	if (keyState[GLFW_KEY_D])
 		submarine->updateSubmarine(Dir::RIGHT, deltaTime, RunProgram::getInstance()->getSubmarineShader(), surface);
 
-	if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
+	if (keyState[GLFW_KEY_SPACE])
 		submarine->updateSubmarine(Dir::UP, deltaTime, RunProgram::getInstance()->getSubmarineShader(), surface);
 
-	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+	if (keyState[GLFW_KEY_S])
 		submarine->updateSubmarine(Dir::DOWN, deltaTime, RunProgram::getInstance()->getSubmarineShader(), surface);
 
-	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+	if (keyState[GLFW_KEY_W])
 		submarine->updateSubmarine(Dir::FORWARD, deltaTime, RunProgram::getInstance()->getSubmarineShader(), surface);
 
-	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+	if (keyState[GLFW_KEY_ESCAPE])
 		glfwSetWindowShouldClose(window, true);
 
+	RunProgram* instance = RunProgram::getInstance();
 	std::shared_ptr<ICamera> camera = instance->getCamera();
-	if (glfwGetKey(window, GLFW_KEY_O) == GLFW_PRESS)//O - camera submarinului
-	{
-		instance->setCamera( instance->getSubmarineCamera());
-	}
 
-	if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS)//P- side view camera
-	{
+	if (keyState[GLFW_KEY_O])
+		instance->setCamera(instance->getSubmarineCamera());
+
+	if (keyState[GLFW_KEY_P])
 		instance->setCamera(instance->getSideCamera());
-	}
 
 	if (std::shared_ptr<SubmarineCamera> currentCamera = std::dynamic_pointer_cast<SubmarineCamera>(camera))
 	{

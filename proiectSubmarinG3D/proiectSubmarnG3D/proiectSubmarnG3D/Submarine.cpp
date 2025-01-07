@@ -9,11 +9,10 @@ Submarine::Submarine(std::string fileName)
 	submarineScale(0.4f),
 	submarinePosition(0.0f),
 	m_model(fileName,false),
-	m_MAX_SPEED{14.f},
-	m_ACCELERATION{2.f},
+	m_MAX_SPEED{20.f},
+	m_ACCELERATION{3.f},
 	m_DECELERATION{1.5f}
 {
-
 	updateForwardDirection();
 	updateSubmarineDirection();
 }

@@ -1,7 +1,9 @@
 ﻿#include "RunProgram.h"
 #include "KeyStateManager.h"
 
-RunProgram::RunProgram() {
+RunProgram::RunProgram()
+{
+
 }
 
 RunProgram* RunProgram::getInstance()
@@ -23,7 +25,7 @@ void RunProgram::run()
 	createLightSource();
 	createSubmarine();
 	createWater();
-	createFishes();
+	createFish();
 	createSpongebobHouse();
 	createTurtles();
 	createCorals();
@@ -37,7 +39,8 @@ void RunProgram::initializeCameras()
 	m_submarinePosition = glm::vec3(0.0, 0.0, 3.0);
 	m_submarineCamera = std::make_shared<SubmarineCamera>(m_SCR_HEIGHT, m_SCR_WIDTH, m_submarinePosition);
 
-	m_sideCameraPosition = glm::vec3(-6.0f, 3.0f, 10.0f);
+	float yPosition =-12.f;
+	m_sideCameraPosition = glm::vec3(25.f, yPosition ,25.0f);
 	m_sideCameraTarget = glm::vec3(0.0f, 0.0f, 0.0f);
 	m_sideCameraWorldUp = glm::vec3(0.0f, 1.0f, 0.0f);
 
@@ -47,11 +50,112 @@ void RunProgram::initializeCameras()
 	m_camera = m_submarineCamera;
 }
 
+void RunProgram::renderWater()
+{
+	m_waterShader->use();
+	m_waterShader->SetVec3("lightDir", m_lightDir);
+	m_waterShader->setFloat("time", glfwGetTime());
+	m_waterShader->SetVec3("lightColor", m_lightSource->getLightColor());
+	m_waterShader->setMat4("view", m_camera->getViewMatrix());
+	m_waterShader->setMat4("projection", m_camera->getProjectionMatrix());
+	m_waterShader->setMat4("lightSpaceMatrix", m_lightSpaceMatrix);
+	m_waterShader->setFloat("nearPlane", 0.1f);
+	m_waterShader->setFloat("farPlane", 500.f);
+	m_waterShader->setInt("shadowMap", 2);
+	glActiveTexture(GL_TEXTURE2);
+	glBindTexture(GL_TEXTURE_2D, m_shadowMap);
+
+	m_water->draw(*m_waterShader);
+	glDepthMask(GL_TRUE);
+	glDisable(GL_BLEND);
+}
+
+void RunProgram::renderSubmarine()
+{
+	m_objectShader->use();
+	m_objectShader->SetVec3("lightDir", m_lightDir);
+	m_objectShader->SetVec3("lightColor", m_lightSource->getLightColor());
+	m_objectShader->SetVec3("viewPos", m_camera->getPosition());
+	m_objectShader->setMat4("projection", m_camera->getProjectionMatrix());
+	m_objectShader->setMat4("view", m_camera->getViewMatrix());
+	m_objectShader->setMat4("model", m_submarine->getModel());
+	m_objectShader->setInt("texture_diffuse1", 0);
+	glActiveTexture(GL_TEXTURE2);
+	glBindTexture(GL_TEXTURE_2D, m_shadowMap);
+	m_objectShader->setInt("shadowMap", 2);
+	m_submarine->draw(*m_objectShader);
+}
+
+void RunProgram::renderLightSource()
+{
+	m_lightSourceShader->use();
+	m_lightSourceShader->setFloat("shininess", 0.8f);
+	m_lightSourceShader->setMat4("model", m_lightSource->getModelMatrix());
+	m_lightSourceShader->setMat4("view", m_camera->getViewMatrix());
+	m_lightSourceShader->setMat4("projection", m_camera->getProjectionMatrix());
+	m_lightSourceShader->SetVec3("lightColor", m_lightSource->getLightColor());
+	m_lightSourceShader->setInt("texture_diffuse1", 0);
+	m_lightSource->rotate(deltaTime, m_lightSourceShader, m_camera->getViewMatrix());
+	m_lightSource->draw(m_lightSourceShader);
+}
+
+void RunProgram::renderSkybox()
+{
+	glm::mat4 scaleMatrix = glm::scale(glm::mat4(1.0f), glm::vec3(37.0f, 15.0f, 37.0f));
+	glm::mat4 translateMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 7.0f, 0.0f));
+	glm::mat4 modelMatrix = translateMatrix * scaleMatrix;
+	m_skyboxShader->use();
+	m_skyboxShader->SetVec3("lightColor", m_lightSource->getLightColor());
+	m_skyboxShader->SetVec3("lightDir", m_lightDir);
+	m_skyboxShader->setMat4("view", glm::mat4(glm::mat3(m_camera->getViewMatrix())));
+	m_skyboxShader->setMat4("projection", m_camera->getProjectionMatrix());
+	m_skyboxShader->setMat4("model", modelMatrix);
+	m_skybox->draw(*m_skyboxShader);
+}
+
+void RunProgram::renderFish()
+{
+	for (auto& fish : m_fishes)
+	{
+		fish->update(deltaTime);
+		fish->draw(*m_objectShader);
+	}
+}
+
+void RunProgram::renderCorals()
+{
+	for (auto& coral : m_corals)
+	{
+		m_objectShader->setMat4("model", coral->getModelMatrix());
+		coral->draw(*m_objectShader);
+	}
+}
+
+void RunProgram::renderTurtles()
+{
+	for (auto& turtle : m_turtles)
+	{
+		turtle->update(deltaTime);
+		turtle->draw(m_objectShader);
+	}
+}
+
+void RunProgram::renderSpongebobHouse()
+{
+	m_objectShader->setMat4("model", m_spongebobHouse->getModelMatrix());
+	m_spongebobHouse->draw(*m_objectShader);
+}
+
+void RunProgram::renderChest()
+{
+	m_objectShader->setMat4("model", m_chest->getModelMatrix());
+	m_chest->draw(*m_objectShader);
+}
+
 void RunProgram::render()
 {
-
 	while (!glfwWindowShouldClose(window)) {
-		glm::vec3 lightDir = glm::normalize(-m_lightSource->getPosition());
+		m_lightDir = glm::normalize(-m_lightSource->getPosition());
 		double currentFrame = glfwGetTime();
 		deltaTime = currentFrame - lastFrame;
 		lastFrame = currentFrame;
@@ -66,16 +170,7 @@ void RunProgram::render()
 		glDepthMask(GL_FALSE);
 		glDepthFunc(GL_LEQUAL);
 
-		glm::mat4 scaleMatrix = glm::scale(glm::mat4(1.0f), glm::vec3(37.0f, 15.0f, 37.0f)); // Scale with a smaller value for Y
-		glm::mat4 translateMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 7.0f, 0.0f));
-		glm::mat4 modelMatrix = translateMatrix * scaleMatrix;
-		m_skyboxShader->use();
-		m_skyboxShader->SetVec3("lightColor", m_lightSource->getLightColor());
-		m_skyboxShader->SetVec3("lightDir", lightDir);
-		m_skyboxShader->setMat4("view", glm::mat4(glm::mat3(m_camera->getViewMatrix())));
-		m_skyboxShader->setMat4("projection", m_camera->getProjectionMatrix());
-		m_skyboxShader->setMat4("model", modelMatrix);
-		m_skybox->draw(*m_skyboxShader);
+		renderSkybox();
 
 		glDisable(GL_BLEND);
 		glDepthMask(GL_TRUE);
@@ -83,78 +178,30 @@ void RunProgram::render()
 		glDepthFunc(GL_LESS);
 		glDisable(GL_CULL_FACE);
 
-		m_lightSourceShader->use();
-		m_lightSourceShader->setFloat("shininess", 0.8f);
-		m_lightSourceShader->setMat4("model", m_lightSource->getModelMatrix());
-		m_lightSourceShader->setMat4("view", m_camera->getViewMatrix());
-		m_lightSourceShader->setMat4("projection", m_camera->getProjectionMatrix());
-		m_lightSourceShader->SetVec3("lightColor", m_lightSource->getLightColor());
-		m_lightSourceShader->setInt("texture_diffuse1", 0);
-		m_lightSource->rotate(deltaTime, m_lightSourceShader, m_camera->getViewMatrix());
-		m_lightSource->draw(m_lightSourceShader);
+		renderLightSource();
 
-		m_submarineShader->use();
-		m_submarineShader->SetVec3("lightDir", lightDir);
-		m_submarineShader->SetVec3("lightColor", m_lightSource->getLightColor());
-		m_submarineShader->SetVec3("viewPos", m_camera->getPosition());
-		m_submarineShader->setMat4("projection", m_camera->getProjectionMatrix());
-		m_submarineShader->setMat4("view", m_camera->getViewMatrix());
-		m_submarineShader->setMat4("model", m_submarine->getModel());
-		m_submarineShader->setInt("texture_diffuse1", 0);
-		// Use the shadow map in the main rendering pass
-		glActiveTexture(GL_TEXTURE2);  // Use texture unit 1 for shadow map
-		glBindTexture(GL_TEXTURE_2D, m_shadowMap); // Bind the shadow map texture
-		m_submarineShader->setInt("shadowMap", 2); // Tell the shader to use texture unit 1 for the shadow map
-		m_submarine->draw(*m_submarineShader);
+		renderSubmarine();
+
 		bool surface = (submarine->getPosition().y >= 0.0f);
 		bool bottom = (submarine->getPosition().y <= -16.0f);
 
 		processInput(window, submarine, deltaTime, surface, bottom);
 
-		for (auto& fish : m_fishes)
-		{
-			fish->update(deltaTime);
-			fish->draw(*m_submarineShader);
-		}
+		renderFish();
 
-		for (auto& coral : m_corals)
-		{
-			m_submarineShader->setMat4("model", coral->getModelMatrix());
-			coral->draw(*m_submarineShader);
-		}
+		renderCorals();
 
-		for (auto& turtle : m_turtles)
-		{
-			turtle->update(deltaTime);
-			turtle->draw(m_submarineShader);
-		}
+		renderTurtles();
 
-		m_submarineShader->setMat4("model", m_spongebobHouse->getModelMatrix());
-		m_spongebobHouse->draw(*m_submarineShader);
+		renderSpongebobHouse();
 
-		m_submarineShader->setMat4("model", m_chest->getModelMatrix());
-		m_chest->draw(*m_submarineShader);
+		renderChest();
 
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glDepthMask(GL_FALSE);
-		m_waterShader->use();
-		m_waterShader->SetVec3("lightDir", lightDir);
-		m_waterShader->setFloat("time", glfwGetTime());
-		m_waterShader->SetVec3("lightColor", m_lightSource->getLightColor());
-		m_waterShader->setMat4("view", m_camera->getViewMatrix());
-		m_waterShader->setMat4("projection", m_camera->getProjectionMatrix());
-		m_waterShader->SetVec3("lightColor", m_lightSource->getLightColor());
-		m_waterShader->setMat4("lightSpaceMatrix", m_lightSpaceMatrix); // Pass the light space matrix
-		m_waterShader->setFloat("nearPlane", 1.f);  // Pass near plane
-		m_waterShader->setFloat("farPlane", 500.f);
-		m_waterShader->setInt("shadowMap", 2);
-		glActiveTexture(GL_TEXTURE2);  // Use texture unit 1 for shadow map
-		glBindTexture(GL_TEXTURE_2D, m_shadowMap); // Bind the shadow map texture
 
-		m_water->draw(*m_waterShader);
-		glDepthMask(GL_TRUE);
-		glDisable(GL_BLEND);
+		renderWater();
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();
@@ -302,8 +349,6 @@ void RunProgram::playMusic()
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
-	// make sure the viewport matches the new window dimensions; note that width and 
-	// height will be significantly larger than specified on retina displays.
 	RunProgram* instance = RunProgram::getInstance();
 	instance->getCamera()->Reshape(width, height);
 }
@@ -372,7 +417,6 @@ void RunProgram::initializeGL()
 	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 	glfwSetKeyCallback(window, key_callback);
 
-	// tell GLFW to capture our mouse
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
 	glewInit();
@@ -393,7 +437,7 @@ void RunProgram::initializePaths()
 	std::wstring_convert<std::codecvt_utf8<wchar_t>> converter;
 	m_currentPath = converter.to_bytes(wscurrentPath);
 
-	m_submarineShader = std::make_unique<Shader>((m_currentPath + "\\Shaders\\Object.vs").c_str(), (m_currentPath + "\\Shaders\\Object.fs").c_str());
+	m_objectShader = std::make_unique<Shader>((m_currentPath + "\\Shaders\\Object.vs").c_str(), (m_currentPath + "\\Shaders\\Object.fs").c_str());
 	m_lightSourceShader = std::make_unique<Shader>((m_currentPath + "\\Shaders\\LightSource.vs").c_str(), (m_currentPath + "\\Shaders\\LightSource.fs").c_str());
 	m_waterShader = std::make_unique<Shader>((m_currentPath + "\\Shaders\\Water.vs").c_str(), (m_currentPath + "\\Shaders\\Water.fs").c_str());
 	m_skyboxShader = std::make_unique<Shader>((m_currentPath + "\\Shaders\\Skybox.vs").c_str(), (m_currentPath + "\\Shaders\\Skybox.fs").c_str());
@@ -452,20 +496,20 @@ void RunProgram::createSkybox()
 	m_skybox = std::make_shared<Skybox>(skyPath.c_str());
 }
 
-void RunProgram::createFishes()
+void RunProgram::createFish()
 {
 	std::string fishPath = m_currentPath + "\\Models\\Fish\\fish.obj";
 
 	const int FishCount = 7;
 	std::vector<float> linearFishSpeeds(FishCount, 6.f);
 	std::vector<float> linearFishHeights(FishCount);
-	std::vector<float> movementLimitsX(FishCount); // Radius on X axis (ellipse)
-	std::vector<float> movementLimitsZ(FishCount); // Radius on Z axis (ellipse)
+	std::vector<float> movementLimitsX(FishCount);
+	std::vector<float> movementLimitsZ(FishCount);
 	std::vector<float> angles(FishCount);
 
-	const int waterSurface = m_water->getSurface(); // water max
-	const int waterBottom = m_water->getBottom(); // water min
-	float maxRadius = m_water->getDistanceFromCenter(); // max radius to spawn
+	const int waterSurface = m_water->getSurface();
+	const int waterBottom = m_water->getBottom();
+	float maxRadius = m_water->getDistanceFromCenter();
 	float startPositionToSpawn = 0.f;
 
 	for (int i = 0; i < FishCount; ++i)

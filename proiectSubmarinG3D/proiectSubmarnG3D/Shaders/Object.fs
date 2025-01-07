@@ -47,7 +47,7 @@ void main()
     vec3 objectColor = texture(texture_diffuse1, texCoord).rgb; // Sample the texture
 
     // Ambient lighting (constant light)
-    float ambientStrength = 0.7; // Increased ambient strength
+    float ambientStrength = 0.6; // Increased ambient strength
     vec3 ambient = ambientStrength * lightColor;
 
     // Diffuse lighting (based on the angle between the surface normal and light direction)
@@ -57,7 +57,7 @@ void main()
     vec3 diffuse = diff * lightColor;               // Scale diffuse light by light color
 
     // Specular lighting (shiny highlights)
-    float specularStrength = 0.7; // Reduced specular strength
+    float specularStrength = 0.6; // Reduced specular strength
     vec3 viewDir = normalize(viewPos - fragPos);                // Direction from fragment to camera
     vec3 reflectDir = reflect(-lightDir, norm);                 // Reflection of the light vector
     float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32);  // Phong specular reflection

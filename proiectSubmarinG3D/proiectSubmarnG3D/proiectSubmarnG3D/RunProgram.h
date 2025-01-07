@@ -67,6 +67,8 @@ private:
 
     std::string m_currentPath;
 
+    glm::vec3 m_lightDir;
+
     std::shared_ptr<Submarine> m_submarine;
     std::shared_ptr<SubmarineCamera> m_submarineCamera;
     std::shared_ptr<SideviewCamera> m_sideCamera;
@@ -80,7 +82,7 @@ private:
     std::vector<std::shared_ptr<Turtle>> m_turtles;
     std::shared_ptr<Chest> m_chest;
 
-    std::unique_ptr<Shader> m_submarineShader;
+    std::unique_ptr<Shader> m_objectShader;
     std::unique_ptr<Shader> m_lightSourceShader;
     std::unique_ptr<Shader> m_waterShader;
     std::unique_ptr<Shader> m_skyboxShader;
@@ -104,10 +106,23 @@ private:
     void createSubmarine();
     void createLightSource();
     void createSkybox();
-    void createFishes();
+    void createFish();
     void createCorals();
     void createTurtles();
+    void createSpongebobHouse();
+    void createChest();
+
     void initializeCameras();
+
+    void renderWater();
+    void renderSubmarine();
+    void renderLightSource();
+    void renderSkybox();
+    void renderFish();
+    void renderCorals();
+    void renderTurtles();
+    void renderSpongebobHouse();
+    void renderChest();
     void render();
 
     float generateRandom(float min, float max);
@@ -116,9 +131,6 @@ private:
     void generateShadowMapTexture();
 
     void playMusic();
-    void createSpongebobHouse();
-
-    void createChest();
 
 public:
     // Static method to get the instance of the class
@@ -143,7 +155,7 @@ public:
     double getDeltaTime() const { return deltaTime; }
     double getLastFrame() const { return lastFrame; }
 
-    Shader& getSubmarineShader() { return *m_submarineShader; }
+    Shader& getSubmarineShader() { return *m_objectShader; }
 
     // Setters
     void setProjMatrixLocation(GLuint value) { ProjMatrixLocation = value; }

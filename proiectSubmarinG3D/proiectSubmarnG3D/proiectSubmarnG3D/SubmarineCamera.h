@@ -27,41 +27,38 @@ class SubmarineCamera : public ICamera
 {
 public:
 	//default camera values
-	const float zNEAR = 0.1f;
-	const float zFAR = 500.f;
-	const float YAW = -90.0f;
-	const float PITCH = 0.0f;
-	const float FOV = 75.0f;
+	const float m_zNEAR = 0.1f;
+	const float m_zFAR = 500.f;
+	const float m_YAW = -90.0f;
+	const float m_PITCH = 0.0f;
+	const float m_FOV = 75.0f;
 
 
-	glm::vec3 cameraPosition;
-	glm::vec3 cameraOffset;
+	glm::vec3 m_cameraPosition;
+	glm::vec3 m_cameraOffset;
 
-	glm::vec3 cameraFront;
-	glm::vec3 cameraUp;
-	glm::vec3 cameraRight;
+	glm::vec3 m_cameraFront;
+	glm::vec3 m_cameraUp;
+	glm::vec3 m_cameraRight;
 
-	glm::vec3 worldUp;
+	glm::vec3 m_worldUp;
 
 	glm::mat4 m_projectionMatrix;
 
-	float yaw;
-	float pitch;
-	float rotationSpeed;
-	float movementSpeed;
-	float fov;
-	float znear;
-	float zfar;
+	float m_yaw;
+	float m_pitch;
+	float m_rotationSpeed;
+	float m_movementSpeed;
+	float m_fov;
+	float m_znear;
+	float m_zfar;
 
-	int height;
-	int width;
+	int m_height;
+	int m_width;
 
 	SubmarineCamera(int newHeight, int newWidth, glm::vec3 position);
-	SubmarineCamera& operator=(const SubmarineCamera& other);
-	SubmarineCamera(const SubmarineCamera& other);
 
 	void updateCamera(glm::vec3 position, glm::vec3 forwardDirection, float newYaw, float newPitch);
-	void resetCamera(int newHeight, int newWidth, glm::vec3 position);
 	void Reshape(int windowWidth, int windowHeight) override;
 	float getYaw();
 	float getPitch();

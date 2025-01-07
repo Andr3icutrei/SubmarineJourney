@@ -15,7 +15,7 @@ private:
 	glm::mat4 m_mat;
 public:
 	Coral(const std::string& modelPath, glm::vec3 position, glm::vec3 scale);
-	void draw(std::unique_ptr<Shader>& shader);
+	void draw(Shader& shader);
 
 	void setPosition(const glm::vec3& position);
 	glm::vec3 getPosition();

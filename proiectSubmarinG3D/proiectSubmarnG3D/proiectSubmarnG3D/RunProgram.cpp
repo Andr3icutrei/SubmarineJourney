@@ -6,7 +6,7 @@ RunProgram::RunProgram() {
 
 RunProgram* RunProgram::getInstance()
 {
-	if (instance == nullptr) 
+	if (instance == nullptr)
 	{
 		instance = new RunProgram();
 	}
@@ -18,11 +18,13 @@ void RunProgram::run()
 	initializeGL();
 	initializeCameras();
 	initializePaths();
+	playMusic();
 	generateShadowMapTexture();
 	createLightSource();
 	createSubmarine();
 	createWater();
 	createFishes();
+	createSpongebobHouse();
 	createCorals();
 	createSkybox();
 	render();
@@ -31,13 +33,13 @@ void RunProgram::run()
 void RunProgram::initializeCameras()
 {
 	m_submarinePosition = glm::vec3(0.0, 0.0, 3.0);
-	m_submarineCamera =std::make_shared<SubmarineCamera>(m_SCR_HEIGHT, m_SCR_WIDTH,m_submarinePosition);
+	m_submarineCamera = std::make_shared<SubmarineCamera>(m_SCR_HEIGHT, m_SCR_WIDTH, m_submarinePosition);
 
-	m_sideCameraPosition = glm::vec3(9.0f, 3.0f, -2.0f);
+	m_sideCameraPosition = glm::vec3(-6.0f, 3.0f, 10.0f);
 	m_sideCameraTarget = glm::vec3(0.0f, 0.0f, 0.0f);
 	m_sideCameraWorldUp = glm::vec3(0.0f, 1.0f, 0.0f);
 
-	m_sideCamera =std::make_shared<SideviewCamera>(m_sideCameraPosition,m_sideCameraTarget, m_sideCameraWorldUp,
+	m_sideCamera = std::make_shared<SideviewCamera>(m_sideCameraPosition, m_sideCameraTarget, m_sideCameraWorldUp,
 		m_SCR_WIDTH, m_SCR_HEIGHT);
 
 	m_camera = m_submarineCamera;
@@ -110,14 +112,17 @@ void RunProgram::render()
 		for (auto& fish : m_fishes)
 		{
 			fish->update(deltaTime);
-			fish->draw(m_submarineShader);
+			fish->draw(*m_submarineShader);
 		}
 
 		for (auto& coral : m_corals)
 		{
 			m_submarineShader->setMat4("model", coral->getModelMatrix());
-			coral->draw(m_submarineShader);
+			coral->draw(*m_submarineShader);
 		}
+
+		m_submarineShader->setMat4("model", m_spongebobHouse->getModelMatrix());
+		m_spongebobHouse->draw(*m_submarineShader);
 
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -152,7 +157,6 @@ float RunProgram::generateRandom(float min, float max)
 	std::random_device rd;
 	std::mt19937 gen(rd());
 
-	// Define a uniform distribution for integers
 	std::uniform_int_distribution<> uniformDist(min, max);
 
 	float rand = uniformDist(gen);
@@ -190,14 +194,17 @@ void RunProgram::generateShadowMap()
 
 	for (auto& fish : m_fishes) {
 		m_shadowShader->setMat4("model", fish->getModelMatrix());
-		fish->draw(m_shadowShader);
+		fish->draw(*m_shadowShader);
 	}
 
 	for (auto& coral : m_corals)
 	{
 		m_shadowShader->setMat4("model", coral->getModelMatrix());
-		coral->draw(m_shadowShader);
+		coral->draw(*m_shadowShader);
 	}
+
+	m_shadowShader->setMat4("model", m_spongebobHouse->getModelMatrix());
+	m_spongebobHouse->draw(*m_shadowShader);
 
 	glCullFace(GL_BACK);
 	glDisable(GL_CULL_FACE);
@@ -241,6 +248,37 @@ void RunProgram::generateShadowMapTexture()
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
+void RunProgram::playMusic()
+{
+	std::string musicPath = m_currentPath + "\\music\\Underwater.mp3";
+
+	// Check if the file exists
+	std::ifstream file(musicPath);
+	if (!file) {
+		std::cerr << "Error: File does not exist at path: " << musicPath << std::endl;
+		return;
+	}
+	else {
+		std::cout << "File found: " << musicPath << std::endl;
+	}
+
+	std::wstring wideMusicPath = std::wstring(musicPath.begin(), musicPath.end());
+	std::wstring command = L"open \"" + wideMusicPath + L"\" type mpegvideo alias bgm";
+
+	if (mciSendString(command.c_str(), NULL, 0, NULL) != 0) {
+		WCHAR errorBuffer[256];
+		mciGetErrorString(GetLastError(), errorBuffer, 256);
+		std::wcerr << L"MCI Error: " << errorBuffer << std::endl;
+		return;
+	}
+
+	if (mciSendString(L"play bgm repeat", NULL, 0, NULL) != 0) {
+		WCHAR errorBuffer[256];
+		mciGetErrorString(GetLastError(), errorBuffer, 256);
+		std::wcerr << L"MCI Error: " << errorBuffer << std::endl;
+		return;
+	}
+}
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
@@ -336,7 +374,6 @@ void RunProgram::initializePaths()
 	m_lightSourceShader = std::make_unique<Shader>((m_currentPath + "\\Shaders\\LightSource.vs").c_str(), (m_currentPath + "\\Shaders\\LightSource.fs").c_str());
 	m_waterShader = std::make_unique<Shader>((m_currentPath + "\\Shaders\\Water.vs").c_str(), (m_currentPath + "\\Shaders\\Water.fs").c_str());
 	m_skyboxShader = std::make_unique<Shader>((m_currentPath + "\\Shaders\\Skybox.vs").c_str(), (m_currentPath + "\\Shaders\\Skybox.fs").c_str());
-
 	m_shadowShader = std::make_unique<Shader>((m_currentPath + "\\Shaders\\Shadow.vs").c_str(), (m_currentPath + "\\Shaders\\Shadow.fs").c_str());
 }
 
@@ -348,7 +385,7 @@ void RunProgram::createWater()
 	std::string strSandJpgPath = m_currentPath + "\\x64\\Debug\\sand.jpg";
 	const char* sandPath{ strSandJpgPath.c_str() };
 
-	m_water = std::make_shared<Water>(glm::vec3(0.0f, -4.0f, 3.0f), glm::vec3(200.0f, 20.0f, 200.0f), waterPath, sandPath);
+	m_water = std::make_shared<Water>(glm::vec3(0.0f, -4.0f, 3.0f), glm::vec3(400.0f, 20.0f, 400.0f), waterPath, sandPath);
 }
 
 void RunProgram::createSubmarine()
@@ -365,7 +402,7 @@ void RunProgram::createLightSource()
 	std::tm* localTime = std::localtime(&currentTime);
 	int hour = localTime->tm_hour;
 
-	glm::vec3 lightSourceScale=glm::vec3(1.0f);
+	glm::vec3 lightSourceScale = glm::vec3(1.0f);
 	glm::vec3 lightColor;
 	std::string mtlPath;
 	if (hour >= 6 && hour <= 18)
@@ -376,12 +413,12 @@ void RunProgram::createLightSource()
 	}
 	else
 	{
-		lightColor=(glm::vec3(0.6f, 0.6f, 1.0f));//moon light color
+		lightColor = (glm::vec3(0.6f, 0.6f, 1.0f));//moon light color
 		lightSourcePath += "\\Models\\Moon\\Moon.obj";
-		lightSourceScale=(glm::vec3(0.2f, 0.2f, 0.2f));
+		lightSourceScale = (glm::vec3(0.2f, 0.2f, 0.2f));
 	}
 
-	m_lightSource=std::make_shared<LightSource>(lightSourcePath,m_lightSourceShader, lightSourceScale);
+	m_lightSource = std::make_shared<LightSource>(lightSourcePath, m_lightSourceShader, lightSourceScale);
 	m_lightSource->setPosition(glm::vec3(-3.0f, 8.0f, -8.0f));
 	m_lightSource->setLightColor(lightColor);
 }
@@ -394,28 +431,28 @@ void RunProgram::createSkybox()
 
 void RunProgram::createFishes()
 {
-    std::string fishPath = m_currentPath + "\\Models\\Fish\\fish.obj";
+	std::string fishPath = m_currentPath + "\\Models\\Fish\\fish.obj";
 
-    const int FishCount = 7;
-    std::vector<float> linearFishSpeeds(FishCount, 6.f);
-    std::vector<float> linearFishHeights(FishCount);
-    std::vector<float> movementLimitsX(FishCount); // Radius on X axis (ellipse)
-    std::vector<float> movementLimitsZ(FishCount); // Radius on Z axis (ellipse)
+	const int FishCount = 7;
+	std::vector<float> linearFishSpeeds(FishCount, 6.f);
+	std::vector<float> linearFishHeights(FishCount);
+	std::vector<float> movementLimitsX(FishCount); // Radius on X axis (ellipse)
+	std::vector<float> movementLimitsZ(FishCount); // Radius on Z axis (ellipse)
 	std::vector<float> angles(FishCount);
 
-    const int waterSurface = m_water->getSurface(); // water max
-    const int waterBottom = m_water->getBottom(); // water min
-    float maxRadius = m_water->getDistanceFromCenter(); // max radius to spawn
-    float startPositionToSpawn = 0.f;
+	const int waterSurface = m_water->getSurface(); // water max
+	const int waterBottom = m_water->getBottom(); // water min
+	float maxRadius = m_water->getDistanceFromCenter(); // max radius to spawn
+	float startPositionToSpawn = 0.f;
 
-    for (int i = 0; i < FishCount; ++i)
-    {
+	for (int i = 0; i < FishCount; ++i)
+	{
 		angles[i] = generateRandom(0.f, 360.f);
-        movementLimitsX[i] = generateRandom(1.0f, maxRadius); 
-        movementLimitsZ[i] = generateRandom(1.0f, maxRadius);
-    }
+		movementLimitsX[i] = generateRandom(1.0f, maxRadius);
+		movementLimitsZ[i] = generateRandom(1.0f, maxRadius);
+	}
 
-	linearFishHeights[0]= -12.f;
+	linearFishHeights[0] = -12.f;
 	for (int i = 1; i < FishCount; ++i)
 	{
 		if (i % 2)
@@ -424,18 +461,16 @@ void RunProgram::createFishes()
 			linearFishHeights[i] = -12.f;
 	}
 
-    for (int i = 0; i < FishCount; ++i)
-    {
-        float randomX = generateRandom(-movementLimitsX[i], movementLimitsX[i]);
-        float randomZ = generateRandom(-movementLimitsZ[i], movementLimitsZ[i]);
+	for (int i = 0; i < FishCount; ++i)
+	{
+		float randomX = generateRandom(-movementLimitsX[i], movementLimitsX[i]);
+		float randomZ = generateRandom(-movementLimitsZ[i], movementLimitsZ[i]);
 
-        std::cout << "Fish " << i << " position: X=" << randomX << ", Y=" << linearFishHeights[i] << ", Z=" << randomZ << '\n';
+		glm::vec3 startPosition(randomX, linearFishHeights[i], randomZ);
+		glm::vec3 scale(50.f);
 
-        glm::vec3 startPosition(randomX, linearFishHeights[i], randomZ);
-        glm::vec3 scale(50.f);
-		
-        m_fishes.push_back(std::make_shared<Fish>(fishPath, startPosition, scale, linearFishSpeeds[i], movementLimitsX[i], movementLimitsZ[i],angles[i]));
-    }
+		m_fishes.push_back(std::make_shared<Fish>(fishPath, startPosition, scale, linearFishSpeeds[i], movementLimitsX[i], movementLimitsZ[i], angles[i]));
+	}
 }
 
 void RunProgram::createCorals()
@@ -443,20 +478,35 @@ void RunProgram::createCorals()
 	std::string coralPath = m_currentPath + "\\Models\\Coral\\coral1.obj";
 
 	const int CoralCount = 25;
-	float maxRadius = m_water->getDistanceFromCenter(); 
-	float yPosition = m_water->getBottom()+4.5f;
-	for (int i = 0; i < CoralCount; ++i) 
+	float maxRadius = m_water->getDistanceFromCenter();
+	float yPosition = m_water->getBottom() + 4.5f;
+	for (int i = 0; i < CoralCount; ++i)
 	{
-		float randomX = generateRandom(-maxRadius, maxRadius);
-		float randomZ = generateRandom(-maxRadius, maxRadius);
-
-		// debug
-		std::cout << "Coral " << i << " position: X=" << randomX << ", Y=" << yPosition << ", Z=" << randomZ << '\n';
+		float randomX;
+		float randomZ;
+		do
+		{
+			randomX = generateRandom(-maxRadius, maxRadius);
+			randomZ = generateRandom(-maxRadius, maxRadius);
+			std::cout << randomX << " " << randomZ << '\n';
+		} while (randomX == m_spongebobHouse->getPosition().x || randomZ == m_spongebobHouse->getPosition().z);
 
 		glm::vec3 startPosition(randomX, yPosition, randomZ);
-		glm::vec3 scale(2.f); 
+		glm::vec3 scale(2.f);
 
 		m_corals.push_back(std::make_shared<Coral>(coralPath, startPosition, scale));
 	}
+}
+
+void RunProgram::createSpongebobHouse()
+{
+	std::string spongebobHousePath = m_currentPath + "\\Models\\SpongebobHouse\\SpongebobHouse.obj";
+
+	m_spongebobHouse = std::make_shared<SpongebobHouse>(spongebobHousePath);
+
+	float yPosition = m_water->getBottom() + 1.5f;
+	glm::vec3 position = glm::vec3(0.f, yPosition, 0.f);
+	glm::vec3 scale = glm::vec3(0.25f);
+	m_spongebobHouse->appear(position, scale);
 }
 

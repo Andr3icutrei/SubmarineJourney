@@ -9,11 +9,11 @@ m_scale(scale)
 	m_mat = glm::scale(m_mat, m_scale);
 }
 
-void Coral::draw(std::unique_ptr<Shader>& shader)
+void Coral::draw(Shader& shader)
 {
-	shader->use();
-	shader->setMat4("model", m_mat);
-	m_model.Draw(*shader);
+	shader.use();
+	shader.setMat4("model", m_mat);
+	m_model.Draw(shader);
 }
 
 void Coral::setPosition(const glm::vec3& position)

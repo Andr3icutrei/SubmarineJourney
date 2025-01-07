@@ -24,7 +24,7 @@ void Fish::update(float deltaTime)
     m_position.z = m_limitZ * sin(glm::radians(m_angle));
 }
 
-void Fish::draw(std::unique_ptr<Shader>& Shader)
+void Fish::draw(Shader& Shader)
 {
     float angle = glm::atan(m_position.x, m_position.z)-90.f;
 
@@ -36,9 +36,9 @@ void Fish::draw(std::unique_ptr<Shader>& Shader)
     // Scale the model
     m_mat = glm::scale(m_mat, m_scale);
 
-    Shader->use();
-    Shader->setMat4("model", m_mat);
-    m_model.Draw(*Shader);
+    Shader.use();
+    Shader.setMat4("model", m_mat);
+    m_model.Draw(Shader);
 }
 
 glm::vec3 Fish::getPosition()

@@ -24,6 +24,10 @@
 #include <memory>
 #include <random>
 
+#include <mmsystem.h>
+
+#pragma comment(lib,"winmm.lib")
+
 #include "Shader.h"
 #include "Model.h"
 #include "FlyingCube.h"
@@ -35,6 +39,7 @@
 #include "Skybox.h"
 #include "Fishes.h"
 #include "Coral.h"
+#include "SpongebobHouse.h"
 
 class RunProgram
 {
@@ -45,8 +50,8 @@ private:
     RunProgram(const RunProgram&) = delete;
     RunProgram& operator=(const RunProgram&) = delete;
 
-    const unsigned int m_SCR_WIDTH = 1200;
-    const unsigned int m_SCR_HEIGHT = 800;
+    const unsigned int m_SCR_WIDTH = 1500;
+    const unsigned int m_SCR_HEIGHT = 1000;
 
     GLFWwindow* window;
 
@@ -69,6 +74,7 @@ private:
     std::shared_ptr<Skybox> m_skybox;
     std::vector<std::shared_ptr<Fish>> m_fishes;
     std::vector<std::shared_ptr<Coral>> m_corals;
+    std::shared_ptr<SpongebobHouse> m_spongebobHouse;
 
     std::unique_ptr<Shader> m_submarineShader;
     std::unique_ptr<Shader> m_lightSourceShader;
@@ -105,6 +111,8 @@ private:
     void generateShadowMapTexture();
 
     glm::mat4 calculateLightProjection(const glm::vec3& lightDir, const glm::mat4& cameraView, const glm::mat4& cameraProjection);
+    void playMusic();
+    void createSpongebobHouse();
 
 public:
     // Static method to get the instance of the class

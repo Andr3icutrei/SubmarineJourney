@@ -24,7 +24,7 @@ private:
 public:
 	Fish(const std::string& modelPath, glm::vec3 startPosition, glm::vec3 scale, float speed, float limitX, float limitZ,float angle);
 	void update(float deltaTime);
-	void draw(std::unique_ptr<Shader> &Shader);
+	void draw(Shader &Shader);
 	glm::vec3 getPosition();
 	void setPosition(const glm::vec3& position);
 

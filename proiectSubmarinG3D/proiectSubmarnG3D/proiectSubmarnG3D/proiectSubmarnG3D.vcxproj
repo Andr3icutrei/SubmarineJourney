@@ -155,6 +155,7 @@
     </ClCompile>
     <ClCompile Include="SideviewCamera.cpp" />
     <ClCompile Include="Skybox.cpp" />
+    <ClCompile Include="SpongebobHouse.cpp" />
     <ClCompile Include="SubmarineCamera.cpp" />
     <ClCompile Include="IObject.cpp" />
     <ClCompile Include="Mesh.cpp" />
@@ -219,6 +220,7 @@
     </ClInclude>
     <ClInclude Include="SideviewCamera.h" />
     <ClInclude Include="Skybox.h" />
+    <ClInclude Include="SpongebobHouse.h" />
     <ClInclude Include="SubmarineCamera.h" />
     <ClInclude Include="IObject.h" />
     <ClInclude Include="Mesh.h" />

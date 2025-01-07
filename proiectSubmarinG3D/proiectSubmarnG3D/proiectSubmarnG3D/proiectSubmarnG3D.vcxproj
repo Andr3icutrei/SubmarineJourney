@@ -147,7 +147,7 @@
   <ItemGroup>
     <ClCompile Include="Chest.cpp" />
     <ClCompile Include="Coral.cpp" />
-    <ClCompile Include="Fishes.cpp" />
+    <ClCompile Include="Fish.cpp" />
     <ClCompile Include="ICamera.cpp" />
     <ClCompile Include="KeyStateManager.cpp" />
     <ClCompile Include="RunProgram.cpp">
@@ -214,7 +214,7 @@
   <ItemGroup>
     <ClInclude Include="Chest.h" />
     <ClInclude Include="Coral.h" />
-    <ClInclude Include="Fishes.h" />
+    <ClInclude Include="Fish.h" />
     <ClInclude Include="ICamera.h" />
     <ClInclude Include="KeyStateManager.h" />
     <ClInclude Include="RunProgram.h">

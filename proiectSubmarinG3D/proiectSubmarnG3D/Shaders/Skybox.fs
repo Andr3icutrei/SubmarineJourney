@@ -1,7 +1,6 @@
 #version 330 core
 
-in vec3 TexCoords;  // Texture coordinates from vertex shader
-in vec3 FragNormal; // Normal from vertex shader
+in vec3 TexCoords;in vec3 FragNormal; // Normal from vertex shader
 
 out vec4 FragColor;  // Output color of the fragment
 

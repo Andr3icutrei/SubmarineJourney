@@ -7,7 +7,7 @@ Turtle::Turtle(const std::string& modelPath, glm::vec3 position, glm::vec3 scale
 	m_velocity(0.0f, 0.f, 0.f),
 	m_speed(1.f)
 {
-	//m_radius = glm::length(glm::vec2(m_position.x, m_position.z));
+
 	m_mat = glm::translate(glm::mat4(1.0f), m_position) * glm::scale(glm::mat4(1.0f), m_scale);
 }
 void Turtle::draw(std::unique_ptr<Shader>& shader)

@@ -1,8 +1,7 @@
 #include "Water.h"
 
 void Water::setupWater()
-{// Vertices for a cuboid (position + texture coordinates)
-    float vertices[] = {
+{    float vertices[] = {
         // Positions         // Texture Coords  // Normals
         // Front face
         -0.5f, -0.5f,  0.5f,   0.0f, 0.0f,   0.0f, 0.0f, 1.0f, // Bottom-left
@@ -75,15 +74,12 @@ void Water::setupWater()
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
-    // Vertex attributes: position
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
 
-    // Texture coordinates attribute
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
     glEnableVertexAttribArray(1);
 
-    // Normals attribute
     glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(5 * sizeof(float)));
     glEnableVertexAttribArray(2);
 
@@ -93,7 +89,6 @@ void Water::setupWater()
 
 void Water::loadTexture(const char* waterTexturePath, const char* sandTexturePath)
 {
-    // Load water texture
     glGenTextures(1, &textureID);
     glBindTexture(GL_TEXTURE_2D, textureID);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -111,7 +106,6 @@ void Water::loadTexture(const char* waterTexturePath, const char* sandTexturePat
     }
     stbi_image_free(data);
 
-    // Load sand texture
     glGenTextures(1, &sandTextureID);
     glBindTexture(GL_TEXTURE_2D, sandTextureID);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -158,7 +152,7 @@ void Water::draw(Shader& shader)
 {
     shader.use();
 
-    // Model matrix for scaling and positioning
+
     glm::mat4 model = glm::mat4(1.0f);
     model = glm::translate(model, position + glm::vec3(0.f, -6.f, 0.f));
     model = glm::scale(model, scale);
@@ -167,7 +161,6 @@ void Water::draw(Shader& shader)
 
     glBindVertexArray(VAO);
 
-    // Bind water and sand textures
     shader.setInt("waterTexture", 0);
     shader.setInt("sandTexture", 1);
 
@@ -178,8 +171,7 @@ void Water::draw(Shader& shader)
     glBindTexture(GL_TEXTURE_2D, sandTextureID);
 
     for (int i = 0; i < 6; ++i) {
-        if (i == 5) { // Bottom face
-            shader.setInt("isBottomFace", 1);
+        if (i == 5) {            shader.setInt("isBottomFace", 1);
         }
         else {
             shader.setInt("isBottomFace", 0);

@@ -1,7 +1,6 @@
 #version 330 core
 
-layout(location = 0) in vec3 aPos;  // Vertex position
-layout(location = 1) in vec3 aNormal;  // Vertex normal
+layout(location = 0) in vec3 aPos;layout(location = 1) in vec3 aNormal;  // Vertex normal
 
 out vec3 TexCoords;  // Pass texture coordinates to fragment shader
 out vec3 FragNormal; // Pass normal to fragment shader

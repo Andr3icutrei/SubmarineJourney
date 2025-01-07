@@ -69,15 +69,12 @@ void Skybox::setupSkybox()
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(skyboxIndices), skyboxIndices, GL_STATIC_DRAW);
 
-    // Position attribute (3 floats)
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
 
-    // Texture coordinates attribute (2 floats)
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
     glEnableVertexAttribArray(1);
 
-    // Normal attribute (3 floats)
     glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(5 * sizeof(float)));
     glEnableVertexAttribArray(2);
 
@@ -94,29 +91,25 @@ void Skybox::loadTexture(const char* skyPath) {
     unsigned char* data = stbi_load(skyPath, &width, &height, &nrChannels, 0);
 
     if (data) {
-        glGenTextures(1, &textureID);  // Generate texture ID for cubemap
-        glBindTexture(GL_TEXTURE_CUBE_MAP, textureID);  // Bind cubemap texture
+        glGenTextures(1, &textureID);
+        glBindTexture(GL_TEXTURE_CUBE_MAP, textureID);
 
-        // Apply the texture to all six faces of the cubemap
         for (unsigned int i = 0; i < 6; ++i) {
             glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
         }
 
-        // Set texture parameters
         glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 
-        // Free the image data
         stbi_image_free(data);
     }
     else {
         std::cout << "Failed to load texture at path: " << skyPath << std::endl;
     }
 
-    // Unbind the cubemap texture
     glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 }
 
@@ -140,15 +133,12 @@ Skybox::~Skybox()
 
 void Skybox::draw(Shader& shader)
 {
-    // Save the current depth function so we can reset it after drawing the skybox
-    glDepthFunc(GL_LEQUAL); // Change depth function to allow rendering the skybox behind everything
+    glDepthFunc(GL_LEQUAL);
 
     glBindVertexArray(VAO);
-    // Bind the cube map texture
-    glActiveTexture(GL_TEXTURE0);  // Activate the texture unit 0
+    glActiveTexture(GL_TEXTURE0);  
     glBindTexture(GL_TEXTURE_CUBE_MAP, textureID);
     shader.setInt("skybox", 0);
-    // Bind the VAO of the skybox and draw it
 
     glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
 

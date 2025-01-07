@@ -47,7 +47,7 @@ void RunProgram::initializeCameras()
 	m_sideCamera = std::make_shared<SideviewCamera>(m_sideCameraPosition, m_sideCameraTarget, m_sideCameraWorldUp,
 		m_SCR_WIDTH, m_SCR_HEIGHT);
 
-	m_camera = m_submarineCamera;
+	m_camera = m_sideCamera;
 }
 
 void RunProgram::renderWater()
@@ -207,7 +207,6 @@ void RunProgram::render()
 		glfwPollEvents();
 	}
 
-	// glfw: terminate, clearing all previously allocated GLFW resources
 	glfwTerminate();
 }
 float RunProgram::generateRandom(float min, float max)
@@ -246,7 +245,6 @@ void RunProgram::generateShadowMap()
 	m_shadowShader->setMat4("lightSpaceMatrix", m_lightSpaceMatrix);
 	glEnable(GL_CULL_FACE);
 	glCullFace(GL_FRONT);
-	// Render scene objects to depth map
 	m_shadowShader->setMat4("model", m_submarine->getModelMatrix());
 	m_submarine->draw(*m_shadowShader);
 
@@ -275,19 +273,16 @@ void RunProgram::generateShadowMap()
 
 	glCullFace(GL_BACK);
 	glDisable(GL_CULL_FACE);
-	// Unbind framebuffer and reset viewport
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	glViewport(0, 0, m_SCR_WIDTH, m_SCR_HEIGHT);  // Reset to screen dimensions
+	glViewport(0, 0, m_SCR_WIDTH, m_SCR_HEIGHT);	
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
 void RunProgram::generateShadowMapTexture()
 {
-	// Create and configure the FBO
 	glGenFramebuffers(1, &m_shadowFBO);
 	glBindFramebuffer(GL_FRAMEBUFFER, m_shadowFBO);
 
-	// Create the shadow map texture
 	glGenTextures(1, &m_shadowMap);
 	glBindTexture(GL_TEXTURE_2D, m_shadowMap);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, 4096, 4096, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
@@ -298,19 +293,15 @@ void RunProgram::generateShadowMapTexture()
 	float borderColor[] = { 1.0, 1.0, 1.0, 1.0 };
 	glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
 
-	// Attach the texture to the FBO as a depth attachment
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, m_shadowMap, 0);
 
-	// Disable color output for the shadow FBO
 	glDrawBuffer(GL_NONE);
 	glReadBuffer(GL_NONE);
 
-	// Check if the framebuffer is complete
 	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
 		std::cout << "ERROR::FRAMEBUFFER:: Shadow map framebuffer is not complete!" << std::endl;
 	}
 
-	// Unbind the framebuffer
 	glViewport(0, 0, m_SCR_WIDTH, m_SCR_HEIGHT);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
@@ -319,7 +310,6 @@ void RunProgram::playMusic()
 {
 	std::string musicPath = m_currentPath + "\\music\\Underwater.mp3";
 
-	// Check if the file exists
 	std::ifstream file(musicPath);
 	if (!file) {
 		std::cerr << "Error: File does not exist at path: " << musicPath << std::endl;
@@ -401,11 +391,18 @@ void processInput(GLFWwindow* window, std::shared_ptr<Submarine> submarine, floa
 
 void RunProgram::initializeGL()
 {
-	glfwInit();
+	// Initialize GLFW
+	if (!glfwInit()) {
+		std::cout << "Failed to initialize GLFW" << std::endl;
+		return;
+	}
+
+	// Set OpenGL version and profile
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
+	// Create the GLFW window
 	window = glfwCreateWindow(m_SCR_WIDTH, m_SCR_HEIGHT, "Submarine", NULL, NULL);
 	if (window == NULL) {
 		std::cout << "Failed to create GLFW window" << std::endl;
@@ -413,18 +410,40 @@ void RunProgram::initializeGL()
 		return;
 	}
 
+	// Get the screen resolution (primary monitor resolution)
+	const GLFWvidmode* mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
+	int screenWidth = mode->width;
+	int screenHeight = mode->height;
+
+	// Calculate the window position to center it
+	int posX = (screenWidth - m_SCR_WIDTH) / 2;
+	int posY = (screenHeight - m_SCR_HEIGHT) / 2;
+
+	// Set the window position to the center of the screen
+	glfwSetWindowPos(window, posX, posY);
+
+	// Make the OpenGL context current
 	glfwMakeContextCurrent(window);
+
+	// Set callbacks
 	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 	glfwSetKeyCallback(window, key_callback);
 
+	// Set input mode for cursor
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
-	glewInit();
+	// Initialize GLEW
+	if (glewInit() != GLEW_OK) {
+		std::cout << "Failed to initialize GLEW" << std::endl;
+		return;
+	}
 
+	// Enable OpenGL features
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 }
+
 
 void RunProgram::initializePaths()
 {
@@ -474,13 +493,13 @@ void RunProgram::createLightSource()
 	std::string mtlPath;
 	if (!(hour >= 6 && hour <= 18))
 	{
-		lightColor = (glm::vec3(1.0f, 0.95f, 1.f));//sun light color
+		lightColor = (glm::vec3(1.0f, 0.95f, 1.f));
 		lightSourcePath += "\\Models\\Sun\\sun.obj";
 		lightSourceScale = (glm::vec3(5.0f, 5.0f, 1.0f));
 	}
 	else
 	{
-		lightColor = (glm::vec3(0.6f, 0.6f, 1.0f));//moon light color
+		lightColor = (glm::vec3(0.6f, 0.6f, 1.0f));
 		lightSourcePath += "\\Models\\Moon\\Moon.obj";
 		lightSourceScale = (glm::vec3(0.2f, 0.2f, 0.2f));
 	}

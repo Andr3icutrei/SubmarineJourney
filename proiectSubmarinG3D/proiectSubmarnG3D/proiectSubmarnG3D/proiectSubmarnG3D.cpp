@@ -1,11 +1,11 @@
-// ViewOBJModel.cpp : This file contains the 'main' function. Program execution begins and ends there.
+
 #define _CRT_SECURE_NO_WARNINGS
 
 #include <Windows.h>
 #include <locale>
 #include <codecvt>
 
-#include <stdlib.h> // necesare pentru citirea shader-elor
+#include <stdlib.h>
 #include <stdio.h>
 #include <math.h> 
 

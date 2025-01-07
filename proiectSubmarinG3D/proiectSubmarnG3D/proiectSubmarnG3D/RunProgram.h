@@ -5,8 +5,7 @@
 #include <locale>
 #include <codecvt>
 
-#include <stdlib.h> // necesare pentru citirea shader-elor
-#include <stdio.h>
+#include <stdlib.h>#include <stdio.h>
 #include <math.h> 
 
 #include <GL/glew.h>
@@ -37,7 +36,7 @@
 #include "SideviewCamera.h"
 #include "Water.h"
 #include "Skybox.h"
-#include "Fishes.h"
+#include "Fish.h"
 #include "Coral.h"
 #include "SpongebobHouse.h"
 #include "Turtle.h"
@@ -133,12 +132,11 @@ private:
     void playMusic();
 
 public:
-    // Static method to get the instance of the class
+
     static RunProgram* getInstance();
 
     void run();
 
-    //getters
     unsigned int getSCRWidth() const { return m_SCR_WIDTH; }
     unsigned int getSCRHeight() const { return m_SCR_HEIGHT; }
 
@@ -157,7 +155,6 @@ public:
 
     Shader& getSubmarineShader() { return *m_objectShader; }
 
-    // Setters
     void setProjMatrixLocation(GLuint value) { ProjMatrixLocation = value; }
     void setViewMatrixLocation(GLuint value) { ViewMatrixLocation = value; }
     void setWorldMatrixLocation(GLuint value) { WorldMatrixLocation = value; }

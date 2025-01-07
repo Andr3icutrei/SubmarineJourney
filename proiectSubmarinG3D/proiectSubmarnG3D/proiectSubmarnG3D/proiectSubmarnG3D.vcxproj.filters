@@ -40,7 +40,7 @@
     <ClCompile Include="Skybox.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Fishes.cpp">
+    <ClCompile Include="Fish.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Coral.cpp">
@@ -102,7 +102,7 @@
     <ClInclude Include="Skybox.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Fishes.h">
+    <ClInclude Include="Fish.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Coral.h">

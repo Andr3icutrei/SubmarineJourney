@@ -26,7 +26,7 @@ enum Dir
 class SubmarineCamera : public ICamera
 {
 public:
-	//default camera values
+
 	const float m_zNEAR = 0.1f;
 	const float m_zFAR = 500.f;
 	const float m_YAW = -90.0f;

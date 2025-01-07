@@ -5,10 +5,13 @@ Submarine::Submarine(std::string fileName)
 	yaw(-90.0f),
 	pitch(0.0f),
 	roll(0.0f),
-	movementSpeed(40.0f),
+	movementSpeed(10.0f),
 	submarineScale(0.4f),
 	submarinePosition(0.0f),
-	m_model(fileName,false)
+	m_model(fileName,false),
+	m_MAX_SPEED{14.f},
+	m_ACCELERATION{2.f},
+	m_DECELERATION{1.5f}
 {
 
 	updateForwardDirection();
@@ -24,7 +27,10 @@ Submarine::Submarine(const Submarine& other):
 	pitch(other.pitch),
 	roll(other.roll),
 	movementSpeed(other.movementSpeed),
-	m_model{other.m_model}
+	m_model{other.m_model},
+	m_MAX_SPEED{other.m_MAX_SPEED},
+	m_ACCELERATION{other.m_ACCELERATION},
+	m_DECELERATION{other.m_DECELERATION}
 {
 }
 
@@ -41,23 +47,6 @@ Submarine& Submarine::operator=(const Submarine& other)
 		movementSpeed = other.movementSpeed;
 	}
 	return *this;
-}
-
-Submarine::Submarine(Submarine&& other) noexcept: 
-	submarineModel(std::move(other.submarineModel)),
-	submarinePosition(std::move(other.submarinePosition)),
-	forwardDirection(std::move(other.forwardDirection)),
-	submarineScale(std::move(other.submarineScale)),
-	yaw(other.yaw),
-	pitch(other.pitch),
-	roll(other.roll),
-	movementSpeed(other.movementSpeed),
-	m_model{other.m_model}
-{
-	other.yaw = 0.0f;
-	other.pitch = 0.0f;
-	other.roll = 0.0f;
-	other.movementSpeed = 0.0f;
 }
 
 Submarine& Submarine::operator=(Submarine&& other) noexcept
@@ -83,61 +72,63 @@ Submarine& Submarine::operator=(Submarine&& other) noexcept
 
 void Submarine::updateSubmarine(Dir dir, double dt, Shader& shader, bool surface, bool bottom)
 {
-	float velocity = (float)dt * movementSpeed;
+	float velocity=0.f;
 
-	sideTilt(dir);
+    sideTilt(dir);
 
-	switch (dir) {
-	case FORWARD: {
-		submarinePosition += forwardDirection * velocity;
-		break;
-	}
-	case RIGHT: {
-		roll -= 0.05f;
+    if (dir == Dir::FORWARD) {
+        movementSpeed += m_ACCELERATION * dt;
+        if (movementSpeed > m_MAX_SPEED) {
+            movementSpeed = m_MAX_SPEED; 
+        }
+        velocity = (float)dt * movementSpeed;
+        submarinePosition += forwardDirection * velocity;
+    } else if (dir == Dir::STOP) {
+        movementSpeed -= m_DECELERATION * dt;
+        if (movementSpeed < 0.0f) {
+            movementSpeed = 0.0f;
+        }
+        if (movementSpeed > 0.0f) {
+            velocity = (float)dt * movementSpeed;
+            submarinePosition += forwardDirection * velocity;
+        }
+    }
+
+    if (dir == Dir::RIGHT) {
+		roll -= 0.2f;
 
 		if (roll <= -20.0f)
 			roll = -20.0f;
 
-		yaw += 0.3f;
-		break;
-	}
-	case LEFT: {
-		roll += 0.05f;
+		yaw += 0.2f;
+    }
+    if (dir == Dir::LEFT) {
+		roll += 0.2f;
 
 		if (roll >= 20.0f)
 			roll = 20.0f;
 
-		yaw -= 0.3f;
-		break;
-	}
-	case UP: {
-		if (pitch <= 20.0f)
-			pitch += 0.05f;
+		yaw -= 0.2f;
+    }
+    if (dir == Dir::UP) {
+        if (pitch <= 20.0f) pitch += 0.05f;
+        if (pitch >= 20.0f) pitch = 20.0f;
+    }
+    if (dir == Dir::DOWN) {
+        if (pitch >= -20.0f) pitch -= 0.05f;
+        if (pitch <= -20.0f) pitch = -20.0f;
+    }
+	
+    if ((surface && pitch >= 0.0f) || (bottom && pitch <= 0.0f)) {
+        updateDirection();
+    } else {
+        updateForwardDirection();
+    }
 
-		if (pitch >= 20.0f)
-			pitch = 20.0f;
-
-		break;
-	}
-	case DOWN: {
-		if (pitch >= -20.0f)
-			pitch -= 0.05f;
-
-		if (pitch <= -20.0f)
-			pitch = -20.0f;
-
-		break;
-	}
-	}
-
-	if (surface && pitch >= 0.0f || bottom && pitch <= 0.0f)
-		updateDirection();
-	else 
-		updateForwardDirection();
-
-	updateSubmarineDirection();
-	draw(shader);
+    updateSubmarineDirection();
+    draw(shader);
 }
+
 
 glm::mat4 Submarine::getModel()
 {
@@ -206,7 +197,7 @@ void Submarine::updateSubmarineDirection()
 
 void Submarine::sideTilt(Dir dir)
 {
-	if (dir != Dir::LEFT && dir != Dir::RIGHT && roll != 0.0f)
+	if (dir != Dir::LEFT && dir != Dir::RIGHT && keyState[GLFW_KEY_W]==false && roll != 0.0f)
 	{
 		float tilt;
 		if (roll < 0.0f)

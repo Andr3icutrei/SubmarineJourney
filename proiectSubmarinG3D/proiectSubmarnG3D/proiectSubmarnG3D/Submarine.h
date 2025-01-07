@@ -11,6 +11,7 @@
 #include "SubmarineCamera.h"
 #include "Model.h"
 #include "IObject.h"
+#include "KeyStateManager.h"
 
 #include <memory>
 #include <string>
@@ -46,6 +47,9 @@ private:
 	float roll;
 	float movementSpeed;
 	Model m_model;
+	const float m_MAX_SPEED;
+	const float m_ACCELERATION;
+	const float m_DECELERATION;
 
 	void updateForwardDirection();
 	void updateDirection();

@@ -19,7 +19,8 @@ enum Dir
 	LEFT,
 	RIGHT,
 	UP,
-	DOWN
+	DOWN,
+	STOP
 };
 
 class SubmarineCamera : public ICamera

@@ -313,6 +313,9 @@ void processInput(GLFWwindow* window, std::shared_ptr<Submarine> submarine, floa
 	if (keyState[GLFW_KEY_W])
 		submarine->updateSubmarine(Dir::FORWARD, deltaTime, RunProgram::getInstance()->getSubmarineShader(), surface, bottom);
 
+	if(!keyState[GLFW_KEY_W])
+		submarine->updateSubmarine(Dir::STOP, deltaTime, RunProgram::getInstance()->getSubmarineShader(), surface, bottom);
+
 	if (keyState[GLFW_KEY_ESCAPE])
 		glfwSetWindowShouldClose(window, true);
 
@@ -385,7 +388,7 @@ void RunProgram::createWater()
 	std::string strSandJpgPath = m_currentPath + "\\x64\\Debug\\sand.jpg";
 	const char* sandPath{ strSandJpgPath.c_str() };
 
-	m_water = std::make_shared<Water>(glm::vec3(0.0f, -4.0f, 3.0f), glm::vec3(400.0f, 20.0f, 400.0f), waterPath, sandPath);
+	m_water = std::make_shared<Water>(glm::vec3(0.0f, -4.0f, 3.0f), glm::vec3(300.0f, 20.0f, 300.0f), waterPath, sandPath);
 }
 
 void RunProgram::createSubmarine()
@@ -405,7 +408,7 @@ void RunProgram::createLightSource()
 	glm::vec3 lightSourceScale = glm::vec3(1.0f);
 	glm::vec3 lightColor;
 	std::string mtlPath;
-	if (hour >= 6 && hour <= 18)
+	if (!(hour >= 6 && hour <= 18))
 	{
 		lightColor = (glm::vec3(1.0f, 0.95f, 1.f));//sun light color
 		lightSourcePath += "\\Models\\Sun\\sun.obj";

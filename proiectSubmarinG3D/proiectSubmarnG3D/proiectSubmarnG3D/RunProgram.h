@@ -110,7 +110,6 @@ private:
     void generateShadowMap();
     void generateShadowMapTexture();
 
-    glm::mat4 calculateLightProjection(const glm::vec3& lightDir, const glm::mat4& cameraView, const glm::mat4& cameraProjection);
     void playMusic();
     void createSpongebobHouse();
 

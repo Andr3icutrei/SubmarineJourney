@@ -41,6 +41,7 @@
 #include "Coral.h"
 #include "SpongebobHouse.h"
 #include "Turtle.h"
+#include "Chest.h"
 
 class RunProgram
 {
@@ -77,6 +78,7 @@ private:
     std::vector<std::shared_ptr<Coral>> m_corals;
     std::shared_ptr<SpongebobHouse> m_spongebobHouse;
     std::vector<std::shared_ptr<Turtle>> m_turtles;
+    std::shared_ptr<Chest> m_chest;
 
     std::unique_ptr<Shader> m_submarineShader;
     std::unique_ptr<Shader> m_lightSourceShader;
@@ -115,6 +117,8 @@ private:
 
     void playMusic();
     void createSpongebobHouse();
+
+    void createChest();
 
 public:
     // Static method to get the instance of the class

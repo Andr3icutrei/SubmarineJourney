@@ -27,6 +27,7 @@ void RunProgram::run()
 	createSpongebobHouse();
 	createTurtles();
 	createCorals();
+	createChest();
 	createSkybox();
 	render();
 }
@@ -131,6 +132,9 @@ void RunProgram::render()
 		m_submarineShader->setMat4("model", m_spongebobHouse->getModelMatrix());
 		m_spongebobHouse->draw(*m_submarineShader);
 
+		m_submarineShader->setMat4("model", m_chest->getModelMatrix());
+		m_chest->draw(*m_submarineShader);
+
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glDepthMask(GL_FALSE);
@@ -218,6 +222,9 @@ void RunProgram::generateShadowMap()
 
 	m_shadowShader->setMat4("model", m_spongebobHouse->getModelMatrix());
 	m_spongebobHouse->draw(*m_shadowShader);
+
+	m_shadowShader->setMat4("model", m_chest->getModelMatrix());
+	m_chest->draw(*m_shadowShader);
 
 	glCullFace(GL_BACK);
 	glDisable(GL_CULL_FACE);
@@ -493,7 +500,7 @@ void RunProgram::createCorals()
 {
 	std::string coralPath = m_currentPath + "\\Models\\Coral\\coral1.obj";
 
-	const int CoralCount = 25;
+	const int CoralCount = 30;
 	float maxRadius = m_water->getDistanceFromCenter();
 	float yPosition = m_water->getBottom() + 4.5f;
 	for (int i = 0; i < CoralCount; ++i)
@@ -527,7 +534,7 @@ void RunProgram::createTurtles()
 	for (int i = 0;i < TurtleCount;++i)
 	{
 		float xOffset = (i == 0) ? -maxX : maxX;
-		float zOffset = (i == 0) ? -maxZ + 50.0f : -maxZ;
+		float zOffset = (i == 0) ? -maxZ + 60.0f : -maxZ + 10.f;
 		glm::vec3 scale = (i == 0) ? glm::vec3(2.0f) : glm::vec3(2.5f);
 
 		auto turtle = std::make_shared<Turtle>(turtlePath, glm::vec3(xOffset, yPosition, zOffset), scale);
@@ -547,5 +554,20 @@ void RunProgram::createSpongebobHouse()
 	glm::vec3 position = glm::vec3(0.f, yPosition, 0.f);
 	glm::vec3 scale = glm::vec3(0.35f);
 	m_spongebobHouse->appear(position, scale);
+}
+
+void RunProgram::createChest()
+{
+	std::string chestPath = m_currentPath + "\\Models\\Chest\\chest.obj";
+
+	m_chest = std::make_shared<Chest>(chestPath);
+
+	float xPosition = m_water->getDistanceFromCenter() / 2;
+	float yPosition = m_water->getBottom() + 4.f;
+	float zPosition = m_water->getDistanceFromCenter() / 2;
+	glm::vec3 position = glm::vec3(xPosition+8.f, yPosition, zPosition);
+	glm::vec3 scale = glm::vec3(1.f);
+
+	m_chest->appear(position, scale);
 }
 

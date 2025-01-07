@@ -145,6 +145,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Chest.cpp" />
     <ClCompile Include="Coral.cpp" />
     <ClCompile Include="Fishes.cpp" />
     <ClCompile Include="ICamera.cpp" />
@@ -211,6 +212,7 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Chest.h" />
     <ClInclude Include="Coral.h" />
     <ClInclude Include="Fishes.h" />
     <ClInclude Include="ICamera.h" />

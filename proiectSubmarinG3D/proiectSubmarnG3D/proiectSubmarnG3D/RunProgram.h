@@ -40,6 +40,7 @@
 #include "Fishes.h"
 #include "Coral.h"
 #include "SpongebobHouse.h"
+#include "Turtle.h"
 
 class RunProgram
 {
@@ -75,6 +76,7 @@ private:
     std::vector<std::shared_ptr<Fish>> m_fishes;
     std::vector<std::shared_ptr<Coral>> m_corals;
     std::shared_ptr<SpongebobHouse> m_spongebobHouse;
+    std::vector<std::shared_ptr<Turtle>> m_turtles;
 
     std::unique_ptr<Shader> m_submarineShader;
     std::unique_ptr<Shader> m_lightSourceShader;
@@ -102,6 +104,7 @@ private:
     void createSkybox();
     void createFishes();
     void createCorals();
+    void createTurtles();
     void initializeCameras();
     void render();
 

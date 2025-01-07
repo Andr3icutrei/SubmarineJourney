@@ -25,6 +25,7 @@ void RunProgram::run()
 	createWater();
 	createFishes();
 	createSpongebobHouse();
+	createTurtles();
 	createCorals();
 	createSkybox();
 	render();
@@ -121,6 +122,12 @@ void RunProgram::render()
 			coral->draw(*m_submarineShader);
 		}
 
+		for (auto& turtle : m_turtles)
+		{
+			turtle->update(deltaTime);
+			turtle->draw(m_submarineShader);
+		}
+
 		m_submarineShader->setMat4("model", m_spongebobHouse->getModelMatrix());
 		m_spongebobHouse->draw(*m_submarineShader);
 
@@ -201,6 +208,12 @@ void RunProgram::generateShadowMap()
 	{
 		m_shadowShader->setMat4("model", coral->getModelMatrix());
 		coral->draw(*m_shadowShader);
+	}
+
+	for (auto& turtle : m_turtles)
+	{
+		m_shadowShader->setMat4("model", turtle->getModelMatrix());
+		turtle->draw(m_shadowShader);
 	}
 
 	m_shadowShader->setMat4("model", m_spongebobHouse->getModelMatrix());
@@ -501,6 +514,29 @@ void RunProgram::createCorals()
 	}
 }
 
+void RunProgram::createTurtles()
+{
+	std::string turtlePath = m_currentPath + "\\Models\\SeaTurtle\\seaturtle.obj";
+
+	const int TurtleCount = 2;
+	float maxX = m_water->getDistanceFromCenter() / 2;
+	float maxZ = m_water->getDistanceFromCenter() - 15.f;
+	float yPosition = m_water->getBottom() + 4.5f;
+	glm::vec3 direction = glm::normalize(glm::vec3(0.f, 0.f, 1.f));
+
+	for (int i = 0;i < TurtleCount;++i)
+	{
+		float xOffset = (i == 0) ? -maxX : maxX;
+		float zOffset = (i == 0) ? -maxZ + 50.0f : -maxZ;
+		glm::vec3 scale = (i == 0) ? glm::vec3(2.0f) : glm::vec3(2.5f);
+
+		auto turtle = std::make_shared<Turtle>(turtlePath, glm::vec3(xOffset, yPosition, zOffset), scale);
+		turtle->setSpeed(0.3f);
+		turtle->setVelocity(direction * turtle->getSpeed());
+		m_turtles.push_back(turtle);
+	}
+}
+
 void RunProgram::createSpongebobHouse()
 {
 	std::string spongebobHousePath = m_currentPath + "\\Models\\SpongebobHouse\\SpongebobHouse.obj";
@@ -509,7 +545,7 @@ void RunProgram::createSpongebobHouse()
 
 	float yPosition = m_water->getBottom() + 1.5f;
 	glm::vec3 position = glm::vec3(0.f, yPosition, 0.f);
-	glm::vec3 scale = glm::vec3(0.25f);
+	glm::vec3 scale = glm::vec3(0.35f);
 	m_spongebobHouse->appear(position, scale);
 }
 

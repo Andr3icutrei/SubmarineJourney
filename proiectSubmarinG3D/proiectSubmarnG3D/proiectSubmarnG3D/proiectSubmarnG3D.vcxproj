@@ -164,6 +164,7 @@
     <ClCompile Include="Shader.cpp" />
     <ClCompile Include="Submarine.cpp" />
     <ClCompile Include="LightSource.cpp" />
+    <ClCompile Include="Turtle.cpp" />
     <ClCompile Include="Water.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -229,6 +230,7 @@
     <ClInclude Include="Submarine.h" />
     <ClInclude Include="LightSource.h" />
     <ClInclude Include="Texture.h" />
+    <ClInclude Include="Turtle.h" />
     <ClInclude Include="Vertex.h" />
     <ClInclude Include="Water.h" />
   </ItemGroup>

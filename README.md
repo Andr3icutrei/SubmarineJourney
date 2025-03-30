@@ -7,7 +7,7 @@ Documentation link: https://docs.google.com/document/d/13PPD7LuxBYwJ1Lyakmtz-qvJ
 Youtube link: https://www.youtube.com/watch?v=JHvUkietIxY&ab_channel=sergiu333
 
 Application controls : 
-W,A,S,D - submarine movement forward, backword, left, right
+W,A,S,D - submarine movement forward, left, backword, right
 
 SHIFT - down
 

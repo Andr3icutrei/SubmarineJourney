@@ -8,6 +8,9 @@ Youtube link: https://www.youtube.com/watch?v=JHvUkietIxY&ab_channel=sergiu333
 
 Application controls : 
 W,A,S,D - submarine movement forward, backword, left, right
+
 SHIFT - down
+
 SPACE - up
+
 O,P - perspective (camera) transition
